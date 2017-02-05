@@ -22,6 +22,8 @@
 
 #include "Wtfs.h"
 
+#include <string.h>
+
 template<class Config>
 inline void WtfsEcosystem<Config>::Node::getName(const char*&start, const char*&end) {
 	start = key.name;
@@ -56,6 +58,9 @@ ubiq::GenericError
 WtfsEcosystem<Config>::WtfsMain::fetchChildByName(Node& node, const char* start, const char* end) {
 	if(node.key.id == -1u)
 		return ubiq::GenericError::invalidArgumentError();
+
+	if(!end)
+		end = start + strlen(start);
 
 	node.key.set(start, end, node.key.id);
 	ubiq::GenericError ret = this->template get(node.key, node);

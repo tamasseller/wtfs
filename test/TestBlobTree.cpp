@@ -27,7 +27,7 @@
 class TestTree;
 
 namespace {
-typedef MockStorage<12, TestTree, false, false> Storage;
+typedef MockStorage<3*sizeof(void*), TestTree, false, false> Storage;
 struct TestTree: public BlobTree<Storage, FailableAllocator, 1> {
 	using Storage::Address;
 	inline TestTree(Address fileRoot, unsigned int size): BlobTree(fileRoot, size) {}
@@ -60,12 +60,12 @@ struct TestData {
 
 	inline void addNPages(unsigned int n) {
 		DISABLE_FAILURE_INJECTION_TEMPORARILY();
-		for(int i = 0; i < n; i++) {
+		for(unsigned int i = 0; i < n; i++) {
 			ubiq::FailPointer<void> ret = tree.empty();
 			CHECK(!ret.failed());
 			unsigned char* buffer = ret;
 
-			for(int j=0; j<Storage::pageSize; j++)
+			for(unsigned int j=0; j<Storage::pageSize; j++)
 				buffer[j] = j;
 
 			ubiq::GenericError result = tree.update(i, Storage::pageSize*(i+1), buffer);
@@ -83,7 +83,7 @@ struct TestData {
 
 		unsigned char* buffer = ret;
 
-		for(int i=Storage::pageSize*1/3; i<Storage::pageSize*3/4; i++)
+		for(unsigned int i=Storage::pageSize*1/3; i<Storage::pageSize*3/4; i++)
 			buffer[i] = i;
 
 		ubiq::GenericError result = tree.update(tree.getSize()/Storage::pageSize, tree.getSize()+Storage::pageSize, buffer);
@@ -99,7 +99,7 @@ struct TestData {
 
 		unsigned char* buffer = ret;
 
-		for(int i=Storage::pageSize*1/3; i<Storage::pageSize*2/3; i++)
+		for(unsigned int i=Storage::pageSize*1/3; i<Storage::pageSize*2/3; i++)
 			buffer[i] = -i;
 
 		ubiq::GenericError result = tree.update(1, tree.getSize(), buffer);
@@ -171,7 +171,7 @@ TEST(SinglePage, Read) {
 	if(ret.failed())
 		return;
 
-	for(int i=0; i<Storage::pageSize; i++)
+	for(unsigned int i=0; i<Storage::pageSize; i++)
 		CHECK_EQUAL(i, buffer[i]);
 
 	test.tree.release(buffer);
@@ -189,7 +189,7 @@ TEST(SinglePage, Update) {
 	if(ret.failed())
 		return;
 
-	for(int i=Storage::pageSize*1/3; i<Storage::pageSize*2/3; i++)
+	for(unsigned int i=Storage::pageSize*1/3; i<Storage::pageSize*2/3; i++)
 		buffer[i] = -i;
 
 	ubiq::GenericError result = test.tree.update(0, test.tree.getSize(), buffer);

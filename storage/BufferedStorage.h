@@ -215,7 +215,7 @@ release(Buffer* buff, BufferReleaseCondition cond)
 			buff->management.address = this->storageManager->allocate(buff->data.level);
 
 			// Wipe stale copies
-			for(int32_t i=0; i<nBuffers; i++) {
+			for(uint32_t i=0; i<nBuffers; i++) {
 				if((buffers + i != buff) &&
 					(buffers[i].management.address == buff->management.address)) {
 					assert(!buffers[i].management.usageCounter, "Wiping occupied page.");

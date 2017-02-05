@@ -20,6 +20,7 @@
 #include "MockFs.h"
 
 #include <algorithm>
+#include <cstring>
 
 #include "FailureInjectorPlugin.h"
 
@@ -58,6 +59,9 @@ ubiq::GenericError MockFs::fetchChildByName(Node& node, const char* start, const
 	if(!node.entry->isDir())
 		return ubiq::GenericError::isNotDirectory;
 
+	if(!end)
+		end = start + std::strlen(start);
+
 	std::string name(start, end-start);
 	for(auto x: ((Directory*)node.entry)->children) {
 		if(x->name == name) {
@@ -81,7 +85,7 @@ ubiq::GenericError MockFs::fetchChildById(Node& node, NodeId id)
 		return ubiq::GenericError::isNotDirectory;
 
 	for(auto x: ((Directory*)node.entry)->children) {
-		if((unsigned int)x == id) {
+		if((uintptr_t)x == id) {
 			node.entry = x;
 			return true;
 		}
@@ -293,7 +297,7 @@ ubiq::GenericError MockFs::Stream::setPosition(Whence whence, int reqOffset)
 	if(!file)
 		return ubiq::GenericError::invalidArgumentError();
 
-	int newOffset;
+	unsigned int newOffset;
 	switch(whence) {
 		case Start:
 			newOffset = reqOffset;

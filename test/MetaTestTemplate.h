@@ -167,8 +167,8 @@ struct FsMetaTestTemplate {
 	struct MetaFooBarStraight {
 		Fs fs;
 		typename Fs::NodeId dirId, fileId;
-		const char *dirName = "foo";
-		const char *fileName = "bar";
+		constexpr static const char *dirName = "foo";
+		constexpr static const char *fileName = "bar";
 
 		void setup() {
 			typename Fs::Node node;
@@ -186,6 +186,24 @@ struct FsMetaTestTemplate {
 			const char *start, *end;
 			node.getName(start, end);
 			STRCMP_EQUAL(dirName, start);
+		}
+
+		inline void copyName() {
+			typename Fs::Node node;
+			requireSuccess(fs.fetchRoot(node));
+			requireSuccess(fs.fetchChildById(node, dirId));
+
+			constexpr auto tmpSize = strlen(dirName)+1;
+			char temp[tmpSize];
+			node.copyName(temp, sizeof(temp));
+
+			CHECK(strcmp(dirName, temp) == 0);
+
+			constexpr auto partialSize = (strlen(dirName) + 1)/2;
+			char partial[partialSize ];
+			node.copyName(partial, sizeof(partial));
+
+			CHECK(strncmp(dirName, partial, sizeof(partial)-1) == 0);
 		}
 
 		inline void isDir() {
@@ -232,6 +250,17 @@ struct FsMetaTestTemplate {
 			node.getName(start, end);
 			STRCMP_EQUAL(fileName, start);
 		}
+
+		inline void findByNameDefaultArg() {
+			typename Fs::Node node;
+			requireSuccess(fs.fetchRoot(node));
+			requireSuccess(fs.fetchChildByName(node, dirName));
+			requireSuccess(fs.fetchChildByName(node, fileName));
+			const char *start, *end;
+			node.getName(start, end);
+			STRCMP_EQUAL(fileName, start);
+		}
+
 
 		inline void addAnotherFileInSubdir() {
 			typename Fs::Node node;
@@ -367,7 +396,9 @@ TEST(MetaFooBarStraight ## x, IsDir) {test.isDir();}   									    										\
 TEST(MetaFooBarStraight ## x, FindInvalid) {test.findInvalid();}																	\
 TEST(MetaFooBarStraight ## x, FindInSubdirById) {test.findInSubdirById();}   								    					\
 TEST(MetaFooBarStraight ## x, FindInRootByName) {test.findInRootByName();}   								    					\
+TEST(MetaFooBarStraight ## x, CopyName) {test.copyName();}   								    									\
 TEST(MetaFooBarStraight ## x, FindInSubdirByName) {test.findInSubdirByName();}   							   						\
+TEST(MetaFooBarStraight ## x, FindByNameDefaultArg) {test.findByNameDefaultArg();}													\
 TEST(MetaFooBarStraight ## x, AddAnotherFileInSubdir) {test.addAnotherFileInSubdir();}   					    					\
 TEST(MetaFooBarStraight ## x, FailNonDirectIdFetch) {test.failNonDirectIdFetch();}   						    					\
 TEST(MetaFooBarStraight ## x, FailToDeleteFoo) {test.failToDeleteFoo();}   									    					\

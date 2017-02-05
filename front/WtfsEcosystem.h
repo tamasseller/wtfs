@@ -22,17 +22,26 @@
 
 #include <cstdint>
 
+// Pet
+
 #include "ubiquitous/Error.h"
 #include "ubiquitous/Trace.h"
 
 #include "data/LinkedList.h"
 
+// Submodules
+
 #include "btree/BTree.h"
 #include "blob/BlobTree.h"
-#include "MetaKeys.h"
+
+#include "common/NodeBase.h"
 
 #include "storage/BufferedStorage.h"
 #include "storage/StorageManager.h"
+
+// Local
+
+#include "MetaKeys.h"
 #include "Storage.h"
 #include "ConfigHelpers.h"
 
@@ -76,7 +85,7 @@ private:
 		}
 	};
 
-	class Node: public FileTree {
+	class Node: public FileTree, public NodeBase<Node> {
 		friend WtfsTestHelper<Config>;
 		friend WtfsMain;
 		friend BlobStore;
@@ -133,7 +142,7 @@ public:
 		inline void bind(Buffers*);
 		ubiq::GenericError initialize(bool purge=false);
 		ubiq::GenericError fetchRoot(Node&);
-		ubiq::GenericError fetchChildByName(Node&, const char*, const char*);
+		ubiq::GenericError fetchChildByName(Node&, const char*, const char* = 0);
 		ubiq::GenericError fetchChildById(Node&, NodeId);
 		ubiq::GenericError fetchFirstChild(Node&);
 		ubiq::GenericError fetchNextSibling(Node&);

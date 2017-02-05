@@ -38,7 +38,7 @@ TEST_GROUP(PoorHash) {
 
 	TEST_SETUP() {
 		DISABLE_FAILURE_INJECTION_TEMPORARILY();
-		for(int i=0; i<size; i += 2) {
+		for(unsigned int i=0; i<size; i += 2) {
 			ubiq::GenericError ret = tree.put(10*i, 5*i);
 			CHECK(!ret.failed());
 			CHECK(ret);
@@ -56,7 +56,7 @@ TEST_GROUP(PoorHash) {
 	TEST_TEARDOWN() {
 		int i = 0;
 		DISABLE_FAILURE_INJECTION_TEMPORARILY();
-		for(int i=0; i<size; i++) {
+		for(unsigned int i=0; i<size; i++) {
 			ubiq::GenericError ret = tree.remove(10*i);
 			CHECK(!ret.failed());
 		}
@@ -76,7 +76,7 @@ TEST(PoorHash, AddOne) {
 
 TEST(PoorHash, DontInsert) {
 	SET_FAILURE_INJECTION_MODE_SHARED()
-	for(int i=0; i<size/scale; i++) {
+	for(unsigned int i=0; i<size/scale; i++) {
 		ubiq::GenericError ret = tree.insert(scale*10*i, -1);
 		CHECK(!ret.failed());
 		CHECK(!ret);

@@ -8,7 +8,6 @@ SOURCES += pet/test/MockAllocator.cpp
 # Test code
 
 #SOURCES += TestFrontConcurrent.cpp
-
 SOURCES += TestBlobStress.cpp
 SOURCES += TestBlobTree.cpp
 SOURCES += TestBTreeDateTests.cpp
@@ -64,12 +63,14 @@ CXXFLAGS += --coverage								# Generate program flow data and inject profiling 
 CXXFLAGS += -fno-exceptions							# Enforce no-exceptions environment
 CXXFLAGS += -fdelete-null-pointer-checks			# Makes branch coverage cleaner 
 CXXFLAGS += -DCPPUTEST_USE_MEM_LEAK_DETECTION=0		# Turn off broken new operator macro magic in CppUTest
+CXXFLAGS += -Wall									# Enable all warnings
+CXXFLAGS += -Wno-unused								# Except for unused variables
 
 LIBS += CppUTest									# Neat little unit testing framework 
 LIBS += CppUTestExt									# Addition goodness, like mock support
 LIBS += archive										# For the integration test
 
-TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib32/
+TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib64/:/opt/gcc-5.3.0/lib32/
 CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
 

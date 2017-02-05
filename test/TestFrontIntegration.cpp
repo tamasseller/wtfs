@@ -61,11 +61,11 @@ TEST_GROUP(Integration) {
 
 				CHECK(usedAddresses.insert(addr).second);
 
-				int n=0;
+				unsigned int n=0;
 				for(Fs::Traversor::Iterator it = parents.iterator(); it.current(); it.step())
 					n++;
 
-				CHECK((int)level + n == levels);
+				CHECK(level + n == levels);
 
 				if(level == 0) {
 					unsigned int n = ((Table*)&temp)->length();

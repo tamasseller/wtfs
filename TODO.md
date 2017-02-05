@@ -4,9 +4,9 @@ For 1.0
 Cleanup
 -------
 
- - Add default value for second argument of fetchChildByName, that enables it to be used conveniently on C strings.
- - Add copyName helper into Node, to ease its use with pure C strings (via some kind of utility decorator CRTP stuff).
- - Check with -m32 and -m64
+ + Add default value for second argument of fetchChildByName, that enables it to be used conveniently on C strings.
+ + Add copyName helper into Node, to ease its use with pure C strings (via some kind of utility decorator CRTP stuff).
+ + Check with -m32 and -m64
  - -Wall proofing all tests (add -Wall -Werror to the global makefile)
  - On HW test suite (big pseudo random data, many files, funny directory structures).
  - Config static_assert sanity checks.

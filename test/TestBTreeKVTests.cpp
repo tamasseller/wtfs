@@ -105,11 +105,11 @@ namespace KeyLengthInfo {
 };
 
 typedef BTree<class Storage, KVTestKey, KVTestIndexKey, const char*, FailableAllocator> TestTree;
-class Storage: public MockStorage<32, TestTree> {};
+class Storage: public MockStorage<8*sizeof(void*), TestTree> {};
 
 static void simpleSearch(TestTree &tree)
 {
-	for(int i=0; i<nKeys; i++) {
+	for(unsigned int i=0; i<nKeys; i++) {
 		KVTestKey key(keys[i]);
 		const char* value = NULL;
 
@@ -166,8 +166,8 @@ static void countLonger(TestTree &tree)
 
 	static char temp[KeyLengthInfo::findMax()+1];
 
-	for(int length = 0; length < KeyLengthInfo::findMax(); length++) {
-		for(int i=0; i<length; i++)
+	for(unsigned int length = 0; length < KeyLengthInfo::findMax(); length++) {
+		for(unsigned int i=0; i<length; i++)
 			temp[i] = '?';
 
 		temp[length] = '\0';
@@ -214,8 +214,8 @@ static void countShorterOrEqual(TestTree &tree)
 
 	static char temp[KeyLengthInfo::findMax()+1];
 
-	for(int length = 0; length < KeyLengthInfo::findMax(); length++) {
-		for(int i=0; i<length; i++)
+	for(unsigned int length = 0; length < KeyLengthInfo::findMax(); length++) {
+		for(unsigned int i=0; i<length; i++)
 			temp[i] = '?';
 
 		temp[length] = '\0';

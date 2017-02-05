@@ -85,12 +85,12 @@ struct GcTestHelpers {
 					++y;
 				}
 
-				for(int i=0; i<Config::FlashDriver::deviceSize; i++) {
+				for(unsigned int i=0; i<Config::FlashDriver::deviceSize; i++) {
 					if (actualUsage[i] != other.actualUsage[i])
 						return false;
 				}
 
-				for(int i=0; i<Wtfs<Config>::maxLevels; i++) {
+				for(unsigned int i=0; i<Wtfs<Config>::maxLevels; i++) {
 					if (	(other.allocations[i].count != Config::FlashDriver::blockSize) &&
 							(allocations[i].addr != other.allocations[i].addr))
 						return false;
@@ -104,7 +104,7 @@ struct GcTestHelpers {
 			using Link = typename State::Link;
 			State ret;
 
-			for(int i=0; i<sizeof(usageCounterCheck)/sizeof(usageCounterCheck[0]); i++)
+			for(unsigned int i=0; i<sizeof(usageCounterCheck)/sizeof(usageCounterCheck[0]); i++)
 				usageCounterCheck[i] = 0;
 
 			typename WtfsTestHelper<Config>::MetaStore::ReadWriteSession session(this);
@@ -117,7 +117,7 @@ struct GcTestHelpers {
 					typename Wtfs<Config>::Buffers::Buffer temp;
 					Config::FlashDriver::read(addr, &temp);
 
-					for(int i = 0; i < ((Table*)&temp)->length(); i++) {
+					for(unsigned int i=0; i < ((Table*)&temp)->length(); i++) {
 						Element &e = ((Table*)&temp)->elements[i];
 
 						typename Wtfs<Config>::Node node;
@@ -141,13 +141,13 @@ struct GcTestHelpers {
 				return addr;
 			}).failed());
 
-			for(int i=0; i<sizeof(usageCounterCheck)/sizeof(usageCounterCheck[0]); i++)
+			for(unsigned int i=0; i<sizeof(usageCounterCheck)/sizeof(usageCounterCheck[0]); i++)
 				ret.actualUsage[i] = usageCounterCheck[i];
 
-			for(int i=0; i<sizeof(this->usageCounters)/sizeof(this->usageCounters[0]); i++)
+			for(unsigned int i=0; i<sizeof(this->usageCounters)/sizeof(this->usageCounters[0]); i++)
 				ret.registeredUsage[i] = this->usageCounters[i];
 
-			for(int i = 0; i < sizeof(this->levelAllocations) / sizeof(this->levelAllocations[0]); i++) {
+			for(unsigned int i = 0; i < sizeof(this->levelAllocations) / sizeof(this->levelAllocations[0]); i++) {
 				ret.allocations[i].count = this->levelAllocations[i].usedCount;
 				ret.allocations[i].addr = this->levelAllocations[i].currentAddress;
 			}

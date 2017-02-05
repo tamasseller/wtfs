@@ -30,6 +30,7 @@
 #include <cstring>
 #include <unordered_set>
 #include <map>
+#include <cstdint>
 
 class MockStorageTrace;
 
@@ -92,7 +93,7 @@ struct MockStorage: protected ubiq::Trace<MockStorageTrace> {
 	// These are the required definitions mentioned above
 	////////////////////////////////////////////////////////////////
 
-	typedef unsigned int Address;
+	typedef uintptr_t Address;
 	static const Address InvalidAddress;
 	static const unsigned int pageSize = pageSizeParam;
 

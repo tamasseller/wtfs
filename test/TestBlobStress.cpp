@@ -29,7 +29,7 @@ namespace {
 
 class TestTree;
 
-typedef MockStorage<12, TestTree, false, false> Storage;
+typedef MockStorage<3*sizeof(void*), TestTree, false, false> Storage;
 struct TestTree: public BlobTree<Storage, FailableAllocator, 1> {
 	using Storage::Address;
 	inline TestTree(Address fileRoot, unsigned int size): BlobTree(fileRoot, size) {}
@@ -41,7 +41,7 @@ struct TestData {
 	inline TestData(): tree(Storage::InvalidAddress, 0) {}
 
 	inline void populate() {
-		for(int i = 0; i < nPages; i++) {
+		for(unsigned int i = 0; i < nPages; i++) {
 			ubiq::FailPointer<void> ret = tree.empty();
 			CHECK(!ret.failed());
 
@@ -50,7 +50,7 @@ struct TestData {
 
 			unsigned char* buffer = ret;
 
-			for(int j=0; j<Storage::pageSize; j++)
+			for(unsigned int j=0; j<Storage::pageSize; j++)
 				buffer[j] = j;
 
 			ubiq::GenericError result = tree.update(i, Storage::pageSize*(i+1), buffer);
@@ -68,7 +68,7 @@ struct TestData {
 
 		unsigned char* buffer = ret;
 
-		for(int i=0; i<Storage::pageSize; i++)
+		for(unsigned int i=0; i<Storage::pageSize; i++)
 			buffer[i] = -i;
 
 		//std::cout << std::endl << "!!!! " << idx << " " << (void*)buffer << std::endl << std::endl;

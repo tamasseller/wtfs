@@ -78,7 +78,7 @@ struct BTreeTestUtils {
 		DISABLE_FAILURE_INJECTION_TEMPORARILY();
 		typename Storage::ReadWriteSession session(&tree);
 
-		CHECK(!tree.traverse(session, [&](typename Storage::Address addr, unsigned int level,
+		CHECK(!tree.traverse(session, [&](typename Storage::Address addr, int level,
 				const Traversor &parents) {
 			CHECK(((typename Storage::PageBuffer*)addr)->level == level);
 			return addr;

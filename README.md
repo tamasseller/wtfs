@@ -76,7 +76,7 @@ int main()
 }
 ```
 
-_User code only ever needs to include header the file called 'Wtfs.h' in the root of the library tree._
+_User code only ever needs to include the header file called 'Wtfs.h' in the root of the library tree for the low-level api._
 
 The application facing software interface (API) of the filesystem is rather unconventional, which is justified by the fact that this
 way it is possible to allocate all the memory required declaratively - that is, without the need for dynamic memory allocation.

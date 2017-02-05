@@ -50,7 +50,7 @@ namespace {
 
 		int used() {
 			int used = 0;
-			for(int i=0; i < FlashDriver::deviceSize; i++)
+			for(unsigned int i=0; i < FlashDriver::deviceSize; i++)
 				if(Super::	isBlockBeingUsed(i))
 					used++;
 
@@ -87,12 +87,12 @@ TEST(StorageManagerSimple, Reclaim)
 {
 	TestData::Address allocd[3 * TestData::FlashDriver::blockSize];
 
-	for(int i=0; i < sizeof(allocd)/sizeof(allocd[0]); i++)
+	for(unsigned int i=0; i < sizeof(allocd)/sizeof(allocd[0]); i++)
 		CHECK((allocd[i] = test->allocate(-1)) != TestData::FlashDriver::InvalidAddress);
 
 	CHECK(test->gcNeeded());
 
-	for(int i=0; i < TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < TestData::FlashDriver::blockSize; i++)
 		test->reclaim(allocd[i]);
 
 	CHECK(!test->gcNeeded());
@@ -111,7 +111,7 @@ TEST(StorageManagerSimple, UsageAfterOnePage)
 
 TEST(StorageManagerSimple, UsageAfterOneBlock)
 {
-	for(int i=0; i < TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(-1) != TestData::FlashDriver::InvalidAddress);
 
 	CHECK(test->used() == TestData::nLevels);
@@ -119,7 +119,7 @@ TEST(StorageManagerSimple, UsageAfterOneBlock)
 
 TEST(StorageManagerSimple, AllocateBlock)
 {
-	for(int i=0; i < TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(-1) == i);
 
 	CHECK(test->getState(0) == TestData::BlockState::Full);
@@ -127,7 +127,7 @@ TEST(StorageManagerSimple, AllocateBlock)
 
 TEST(StorageManagerSimple, ReclaimBlock)
 {
-	for(int i=0; i < TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(-1) == i);
 
 	CHECK(test->getState(0) == TestData::BlockState::Full);
@@ -140,7 +140,7 @@ TEST(StorageManagerSimple, ReclaimBlock)
 TEST(StorageManagerSimple, DontTriggerGc) {
 	int level;
 
-	for(int i=0; i < TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(0) != TestData::FlashDriver::InvalidAddress);
 }
 
@@ -229,7 +229,7 @@ TEST_GROUP(StorageManagerBarelyEnough) {
 TEST(StorageManagerBarelyEnough, AllocFail) {
 	CHECK(test->init());
 
-	for(int i=0; i < 5 * TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < 5 * TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(-1) != TestData::FlashDriver::InvalidAddress);
 
 	CHECK(test->allocate(-1) == TestData::FlashDriver::InvalidAddress);
@@ -238,10 +238,10 @@ TEST(StorageManagerBarelyEnough, AllocFail) {
 TEST(StorageManagerBarelyEnough, AllocFailIndep) {
 	CHECK(test->init());
 
-	for(int i=0; i < 3 * TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < 3 * TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(-1) != TestData::FlashDriver::InvalidAddress);
 
-	for(int i=0; i < 3 * TestData::FlashDriver::blockSize; i++)
+	for(unsigned int i=0; i < 3 * TestData::FlashDriver::blockSize; i++)
 		CHECK(test->allocate(1) != TestData::FlashDriver::InvalidAddress);
 
 	CHECK(test->allocate(-1) == TestData::FlashDriver::InvalidAddress);

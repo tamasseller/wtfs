@@ -71,7 +71,7 @@ private:
 	/**
 	 * Private constructor for the invalidKey
 	 */
-	DateKey(): year(0), day(0), month(0), eventRating(0){}
+	DateKey(): year(0), month(0), day(0), eventRating(0){}
 };
 
 /**

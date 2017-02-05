@@ -39,7 +39,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 		uint32_t maxSequenceCounter = 0;
 		Address root = FlashDriver::InvalidAddress;
 
-		for(int32_t i=0; i<FlashDriver::deviceSize; i++) {
+		for(uint32_t i=0; i<FlashDriver::deviceSize; i++) {
 			Address page = i * FlashDriver::blockSize;
 			Buffer* buff = this->buffers->find(page);
 
@@ -102,7 +102,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 			this->buffers->release(buff, Clean);
 		}
 
-		for(int32_t i=0; i<FlashDriver::deviceSize; i++)
+		for(uint32_t i=0; i<FlashDriver::deviceSize; i++)
 			this->usageCounters[i] = 0;
 
 		this->updateCounter = maxSequenceCounter+1;
@@ -139,7 +139,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 					if(level == 0) {
 						Buffer* buff = self->buffers->find(addr);
 
-						for(int32_t i = 0; i < ((MetaTable*)buff->data.user)->length(); i++) {
+						for(uint32_t i = 0; i < ((MetaTable*)buff->data.user)->length(); i++) {
 							MetaElement &e = ((MetaTable*)buff->data.user)->elements[i];
 							if(e.key.id > self->maxId)
 								self->maxId = e.key.id;
@@ -165,7 +165,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 
 		this->closeReadWriteSession(session);
 
-		for(int32_t i=0; i<Manager::maxLevels; i++) {
+		for(uint32_t i=0; i<Manager::maxLevels; i++) {
 			if(this->levelAllocations[i].currentAddress == -1u) {
 				this->levelAllocations[i].currentAddress = this->findFree();
 				this->levelAllocations[i].usedCount = 0;
@@ -176,7 +176,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 		}
 
 		this->spareCount = 0;
-		for(int32_t i=0; i<FlashDriver::deviceSize; i++)
+		for(uint32_t i=0; i<FlashDriver::deviceSize; i++)
 			if(this->usageCounters[i] == 0)
 				this->spareCount++;
 

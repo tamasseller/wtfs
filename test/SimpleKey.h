@@ -20,9 +20,11 @@
 #ifndef SIMPLEKEY_H_
 #define SIMPLEKEY_H_
 
+#include <stdint.h>
+
 struct Key {
 	static const Key InvalidKey;
-	int value;
+	uintptr_t value;
 
 	inline bool operator >(const Key& than) const {
 		return value > than.value;

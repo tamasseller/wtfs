@@ -23,11 +23,15 @@
 #include <vector>
 #include <string>
 
+#include <cstdint>
+
 #include "ubiquitous/Error.h"
+
+#include "common/NodeBase.h"
 
 class MockFs {
 public:
-	typedef unsigned int NodeId;
+	typedef uintptr_t NodeId;
 	class Node;
 	class Stream;
 private:
@@ -65,7 +69,7 @@ private:
 	ubiq::GenericError checkNew(Node&, const char*, const char*);
 public:
 	ubiq::GenericError fetchRoot(Node&);
-	ubiq::GenericError fetchChildByName(Node&, const char*, const char*);
+	ubiq::GenericError fetchChildByName(Node&, const char*, const char* end = 0);
 	ubiq::GenericError fetchChildById(Node&, NodeId);
 	ubiq::GenericError fetchFirstChild(Node&);
 	ubiq::GenericError fetchNextSibling(Node&);
@@ -76,7 +80,7 @@ public:
 	ubiq::GenericError openStream(Node&, Stream&);
 	ubiq::GenericError flushStream(Stream&);
 
-	class Node {
+	class Node: public NodeBase<Node> {
 		Entry* entry;
 	public:
 		friend MockFs;
