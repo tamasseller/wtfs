@@ -20,11 +20,6 @@ performance by leveraging agressive inlining.
 And also to introduce internal decoupling, through templatization to make the whole software module
 thoroughly testable layer by layer.
 
-So in order **to use this library you need a decent compiler with stable C++11 support** (like GCC 5+)
-
-How to use it
--------------
-
 ![System block diagram](https://g.gravizo.com/g?
   digraph G {
     wtfs[shape=record label="<l>wtfs\\nlogic|<b>buffers|<m>manager"];
@@ -39,6 +34,15 @@ How to use it
   }
 )
 
+How to use it
+-------------
+
+**To use this library you need a decent compiler with stable C++11 support** (like GCC 5+)
+
+The structure of the source tree is segmented into directories based on topic, 
+but there is significant cross including going on between the headers, so to keep
+things simple **add the root of the libraray tree to your include path** to get things going.
+
 The whole filesystem code is implemented as set of class templates and all of the configuration data and
 environment dependencies are injected through a single template parameter.
 
@@ -51,6 +55,8 @@ the buffer part needs to be accessible for the DMA (if used).
 Here is an example of the minimal fs instantiation and system start up code:
 
 ```c++
+#include "Wtsf.h"
+
 typedef Wtfs<Config> Fs;
 
 Fs fs;
@@ -64,6 +70,8 @@ int main()
 	// do stuff
 }
 ```
+
+_User code only ever needs to include header the file called 'Wtfs.h' in the root of the library tree._
 
 The application facing software interface (API) of the filesystem is rather unconventional, which is justified by the fact that this
 way it is possible to allocate all the memory required declaratively - that is, without the need for dynamic memory allocation.
@@ -79,7 +87,7 @@ The low-level api involves two types nested into the the fs type:
    It has a zero-copy enabled interface - that is, its read and write operations do not copy the data, but rather they give the application 
    the buffers that are needed to be read from or written to.
  
-See the [docs](http://???) for the detailed method descriptions.
+See **code examples below** or the [docs](http://???) for the detailed method descriptions.
 
 Names are not necessarily standard C (ie. zero-terminated) strings, to avoid wasting the last byte of the file name field in the stored
 data structures. It can matter if you want to go extremely dense, and use very short filenames.
@@ -89,7 +97,27 @@ There are several helpers that establish a higher-level, more familiar view and 
  - Path: represents a path, with internal identifiers. Also can parse textual paths.
  - ObjectStream: a decorator template for the Stream object that adds copier methods.
 
-See the [docs](http://???) for the detailed method descriptions.
+See **code examples below** or the [docs](http://???) for the detailed method descriptions.
+
+### Configuration
+
+To acheive high performance and wide usability at the same time with a single, well tested code base it is necessary 
+to leave many things configurable for the user. 
+
+As stated above, the dependency injection is implemented in the form of a single template argument.
+This is a rather unorthodox method of supplying configuration data, compared to the plain-old &lt;something&gt;_config.h
+method, but it has several advantages:
+
+ - All of the application, the fs code, and the injected dependencies are available for the compiler for inlining.
+ - Makes it easy to find the boundaries between the fs code and the glue.
+ - Makes it possible to compose the configuration from classes implementing different aspects, 
+   through subclassing or by employing the using keyword.
+
+The configuration is provided as template type argument, this type - supplied by the user - has to contain several constants and nested types.
+There are many concerns that the configuration type has to address, like: low-level I/O access driver, methods of dynamic memory allocation,
+and locking if used with an OS, also some tweakable parameters are exposed this way.
+
+See **code examples below** or the [docs](http://???) for the detailed descriptions.
 
 ### Code examples
 
@@ -169,20 +197,6 @@ close are the ones that actually write the data out, if required by the internal
 
 _Also the length parameter of write is only a maximum, just as with the read method_
 
-### Configuration
-
-To acheive high performance and wide usability at the same time with a single code base it is necessary to leave many
-things configurable for the integrator. 
-
-As stated above, the dependency injection is implemented in the form of a single template argument.
-This is a rather unorthodox method of supplying configuration data, compared to the plain-old &lt;something&gt;_config.h
-method, but it has several advantages:
-
- - All of the application, the fs code, and the injected dependencies are available for the compiler for inlining.
- - Makes it easy to find the boundaries between the fs code and the glue.
- - Makes it possible to compose the configuration from classes implementing different aspects, 
-   through subclassing or by employing the using keyword.
-
 A schematic example is provided of a minimal single-threaded bare-metal configuration.
 
 ```c++
@@ -247,15 +261,15 @@ Because that update procedure includes the root of the tree, the whole structure
 
 Also the b+ tree is very efficient for both inserting and searching, so by basing the metadata 
 storage on the b+ tree, two of the goals are automatically met: robustness and efficiency.
-The efficiency gained by employing it can than be traded off for minimizing the ram usage by
+The efficiency gained by employing it can then be traded off for minimizing the ram usage by
 keeping only the absolutely necessary amount of stored data in RAM.
 
 That is achieved by implementing the tree in a way that pages containing the nodes are read as late
 as possible, and discarded as soon as they can be. 
-This could have lead to terrible inefficiency, but to counteract this a cached page storage have been
+This could have lead to terrible inefficiency, but to counteract this a cached page buffer have been
 put between the tree management module and the actual media access layer.
 
-However because the upper layers of the b+ tree contain only very minimal amount of data (about 8 bytes)
+However because the upper layers of the b+ tree contain only very minimal amount of data (about 12 bytes per child)
 a very high fanout is achieved (~50-300 depending on pages size and ECC parameters), which means that the
 meta tree is rather shallow even for large number of stored files.
 So a modest number of page buffers (below ten for light concurrency) can totally avoid the
@@ -266,7 +280,7 @@ to preserve the above mentioned goodnesses of transactional tree updates.
 It also provides a method to flush the current contents to enable the user to ensure completion 
 of operations in critical application processes.
 
-For a detailed description see the [docs](http://???).
+For a more in-depth description see the [docs](http://???).
 
 Implementation notes
 --------------------
@@ -274,7 +288,7 @@ Implementation notes
 ### Dynamic memory
 
 The use of dynamic memory, in algorithms of this complexity is nearly inevitable, but it is kept at minimum as heap usage is big no-no
-for deeply embedded, always-on system. So as little as a few hundred bytes of heap should do it, for regular use-cases.
+for deeply embedded, always-on system. So, as little as a few hundred bytes of heap should do it, for the intended use-cases.
 
 Future plans
 ------------

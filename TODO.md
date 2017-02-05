@@ -9,6 +9,7 @@ Cleanup
  - Check with -m32 and -m64
  - -Wall proofing all tests (add -Wall -Werror to the global makefile)
  - On HW test suite (big pseudo random data, many files, funny directory structures).
+ - Config static_assert sanity checks.
 
 Implementation
 --------------
