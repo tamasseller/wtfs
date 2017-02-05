@@ -43,6 +43,11 @@ The structure of the source tree is segmented into directories based on topic,
 but there is significant cross including going on between the headers, so to keep
 things simple **add the root of the libraray tree to your include path** to get things going.
 
+Also, as this code uses several parts of the [pet](http://github.com/tamasseller/pet "Proper Embedded Templates")
+library you will **also need to add the root of the pet tree** that to your include path.
+It is done like so to avoid feature duplication (like basic data structure primitives) 
+because you may want to use those pet utilities in your application too.
+
 The whole filesystem code is implemented as set of class templates and all of the configuration data and
 environment dependencies are injected through a single template parameter.
 
