@@ -67,11 +67,23 @@ CXXFLAGS += -Wall									# Enable all warnings
 CXXFLAGS += -Wno-unused								# Except for unused variables
 
 LIBS += CppUTest									# Neat little unit testing framework 
-LIBS += CppUTestExt									# Addition goodness, like mock support
+LIBS += CppUTestExt									# Additional goodness, like mock support
 LIBS += archive										# For the integration test
 
-TEST_CMD_PREFIX=LD_LIBRARY_PATH=/opt/gcc-5.3.0/lib64/:/opt/gcc-5.3.0/lib32/
-CXX=/opt/gcc-5.3.0/bin/g++
 LD=$(CXX) 
+
+all: $(OUTPUT)
+
+DOCKER_IMAGE = build
+
+docker-test:
+	@printf '\e[1;32mStarting build container\e[0m\n'
+	@r() { docker run -it -v "$$1":"$$1" --workdir "$$2" -u $$(id -u):$$(id -g) $(DOCKER_IMAGE) make check; }; r $(realpath ..) $(realpath .)
+	@printf '\e[1;32mContainerized builder exited\e[0m\n'
+
+docker-debug:
+	@printf '\e[1;32mStarting debug container\e[0m\n'
+	@r() { docker run -it -v "$$1":"$$1" --workdir "$$2" -u $$(id -u):$$(id -g) $(DOCKER_IMAGE) gdb $(OUTPUT); }; r $(realpath ..) $(realpath .)
+	@printf '\e[1;32mContainerized debugger exited\e[0m\n'
 
 include ultimate-makefile/Makefile.ultimate	
