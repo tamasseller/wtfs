@@ -37,7 +37,7 @@ struct TestTree: public BlobTree<Storage, FailableAllocator, 1> {
 		Storage::ReadWriteSession session(this);
 		Address retAddr;
 
-		ubiq::GenericError ret = traverse(session, [&](typename Storage::Address addr, unsigned int level, const Traversor&) -> typename Storage::Address {
+		pet::GenericError ret = traverse(session, [&](typename Storage::Address addr, unsigned int level, const Traversor&) -> typename Storage::Address {
 			if(--n)
 				return addr;
 
@@ -61,21 +61,21 @@ struct TestData {
 	inline void addNPages(unsigned int n) {
 		DISABLE_FAILURE_INJECTION_TEMPORARILY();
 		for(int i = 0; i < n; i++) {
-			ubiq::FailPointer<void> ret = tree.empty();
+			pet::FailPointer<void> ret = tree.empty();
 			CHECK(!ret.failed());
 			unsigned char* buffer = ret;
 
 			for(int j=0; j<Storage::pageSize; j++)
 				buffer[j] = j;
 
-			ubiq::GenericError result = tree.update(i, Storage::pageSize*(i+1), buffer);
+			pet::GenericError result = tree.update(i, Storage::pageSize*(i+1), buffer);
 			CHECK(!result.failed());
 		}
 		ENABLE_FAILURE_INJECTION_TEMPORARILY();
 	}
 
 	inline void append() {
-	ubiq::FailPointer<void> ret = tree.empty();
+	pet::FailPointer<void> ret = tree.empty();
 		CHECK(!ret.failed());
 
 		if(ret.failed())
@@ -86,12 +86,12 @@ struct TestData {
 		for(int i=Storage::pageSize*1/3; i<Storage::pageSize*3/4; i++)
 			buffer[i] = i;
 
-		ubiq::GenericError result = tree.update(tree.getSize()/Storage::pageSize, tree.getSize()+Storage::pageSize, buffer);
+		pet::GenericError result = tree.update(tree.getSize()/Storage::pageSize, tree.getSize()+Storage::pageSize, buffer);
 		CHECK(!result.failed());
 	}
 
 	inline void update() {
-		ubiq::FailPointer<void> ret = tree.read(1);
+		pet::FailPointer<void> ret = tree.read(1);
 		CHECK(!ret.failed());
 
 		if(ret.failed())
@@ -102,7 +102,7 @@ struct TestData {
 		for(int i=Storage::pageSize*1/3; i<Storage::pageSize*2/3; i++)
 			buffer[i] = -i;
 
-		ubiq::GenericError result = tree.update(1, tree.getSize(), buffer);
+		pet::GenericError result = tree.update(1, tree.getSize(), buffer);
 		CHECK(!result.failed());
 	}
 
@@ -125,12 +125,12 @@ TEST_GROUP(Empty) {
 };
 
 TEST(Empty, InvalidRead) {
-	ubiq::FailPointer<void> ret = test.tree.read(0);
+	pet::FailPointer<void> ret = test.tree.read(0);
 	CHECK(ret.failed());
 }
 
 TEST(Empty, VeryInvalidRead) {
-	ubiq::FailPointer<void> ret = test.tree.read(1);
+	pet::FailPointer<void> ret = test.tree.read(1);
 	CHECK(ret.failed());
 }
 
@@ -139,7 +139,7 @@ TEST(Empty, GetSize) {
 }
 
 TEST(Empty, AppendOne) {
-	ubiq::FailPointer<void> ret = test.tree.empty();
+	pet::FailPointer<void> ret = test.tree.empty();
 	CHECK(!ret.failed());
 
 	if(ret.failed())
@@ -147,7 +147,7 @@ TEST(Empty, AppendOne) {
 
 	void *buffer = ret;
 
-	ubiq::GenericError result = test.tree.update(0, 1, buffer);
+	pet::GenericError result = test.tree.update(0, 1, buffer);
 	CHECK(!result.failed());
 }
 
@@ -164,7 +164,7 @@ TEST_GROUP(SinglePage) {
 };
 
 TEST(SinglePage, Read) {
-	ubiq::FailPointer<void> ret = test.tree.read(0);
+	pet::FailPointer<void> ret = test.tree.read(0);
 	CHECK(!ret.failed());
 	unsigned char* buffer = ret;
 
@@ -182,7 +182,7 @@ TEST(SinglePage, GetSize) {
 }
 
 TEST(SinglePage, Update) {
-	ubiq::FailPointer<void> ret = test.tree.read(0);
+	pet::FailPointer<void> ret = test.tree.read(0);
 	CHECK(!ret.failed());
 	unsigned char* buffer = ret;
 
@@ -192,7 +192,7 @@ TEST(SinglePage, Update) {
 	for(int i=Storage::pageSize*1/3; i<Storage::pageSize*2/3; i++)
 		buffer[i] = -i;
 
-	ubiq::GenericError result = test.tree.update(0, test.tree.getSize(), buffer);
+	pet::GenericError result = test.tree.update(0, test.tree.getSize(), buffer);
 	CHECK(!result.failed());
 }
 

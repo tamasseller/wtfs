@@ -38,25 +38,25 @@ MockFs::Entry::Entry(const std::string &name, struct Directory* parent):
 		parent->children.push_back(this);
 }
 
-ubiq::GenericError MockFs::fetchRoot(Node& node)
+pet::GenericError MockFs::fetchRoot(Node& node)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	node.entry = &root;
 	return true;
 }
 
-ubiq::GenericError MockFs::fetchChildByName(Node& node, const char* start, const char* end)
+pet::GenericError MockFs::fetchChildByName(Node& node, const char* start, const char* end)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(!node.entry->isDir())
-		return ubiq::GenericError::isNotDirectory;
+		return pet::GenericError::isNotDirectory;
 
 	std::string name(start, end-start);
 	for(auto x: ((Directory*)node.entry)->children) {
@@ -66,19 +66,19 @@ ubiq::GenericError MockFs::fetchChildByName(Node& node, const char* start, const
 		}
 	}
 
-	return ubiq::GenericError::noSuchEntryError();
+	return pet::GenericError::noSuchEntryError();
 }
 
-ubiq::GenericError MockFs::fetchChildById(Node& node, NodeId id)
+pet::GenericError MockFs::fetchChildById(Node& node, NodeId id)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(!node.entry->isDir())
-		return ubiq::GenericError::isNotDirectory;
+		return pet::GenericError::isNotDirectory;
 
 	for(auto x: ((Directory*)node.entry)->children) {
 		if((unsigned int)x == id) {
@@ -87,19 +87,19 @@ ubiq::GenericError MockFs::fetchChildById(Node& node, NodeId id)
 		}
 	}
 
-	return ubiq::GenericError::noSuchEntryError();
+	return pet::GenericError::noSuchEntryError();
 }
 
-ubiq::GenericError MockFs::fetchFirstChild(Node& node)
+pet::GenericError MockFs::fetchFirstChild(Node& node)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(!node.entry->isDir())
-		return ubiq::GenericError::isNotDirectoryError();
+		return pet::GenericError::isNotDirectoryError();
 
 	auto &children = ((Directory*)node.entry)->children;
 	auto x = children.begin();
@@ -111,13 +111,13 @@ ubiq::GenericError MockFs::fetchFirstChild(Node& node)
 	return true;
 }
 
-ubiq::GenericError MockFs::fetchNextSibling(Node& node)
+pet::GenericError MockFs::fetchNextSibling(Node& node)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(!node.entry->parent) // the root has no siblings
 		return false;
@@ -126,7 +126,7 @@ ubiq::GenericError MockFs::fetchNextSibling(Node& node)
 	auto x = std::find(children.begin(), children.end(), node.entry);
 
 	if(x == children.end()) // current not found, WTF ??
-		return ubiq::GenericError::noSuchEntryError();
+		return pet::GenericError::noSuchEntryError();
 
 	++x;
 
@@ -137,28 +137,28 @@ ubiq::GenericError MockFs::fetchNextSibling(Node& node)
 	return true;
 }
 
-ubiq::GenericError MockFs::checkNew(Node& node, const char* start, const char* end)
+pet::GenericError MockFs::checkNew(Node& node, const char* start, const char* end)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	std::string name(start, end-start);
 	for(auto x: ((Directory*)node.entry)->children)
 		if(x->name == name)
-			return ubiq::GenericError::alreadyExistsError();
+			return pet::GenericError::alreadyExistsError();
 
 	return true;
 }
 
-ubiq::GenericError MockFs::newDirectory(Node& node, const char* start, const char* end)
+pet::GenericError MockFs::newDirectory(Node& node, const char* start, const char* end)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::writeError();
+		return pet::GenericError::writeError();
 
-	ubiq::GenericError ret = checkNew(node, start, end);
+	pet::GenericError ret = checkNew(node, start, end);
 	if(ret.failed())
 		return ret.rethrow();
 
@@ -166,12 +166,12 @@ ubiq::GenericError MockFs::newDirectory(Node& node, const char* start, const cha
 	return true;
 }
 
-ubiq::GenericError MockFs::newFile(Node& node, const char* start, const char* end)
+pet::GenericError MockFs::newFile(Node& node, const char* start, const char* end)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::writeError();
+		return pet::GenericError::writeError();
 
-	ubiq::GenericError ret = checkNew(node, start, end);
+	pet::GenericError ret = checkNew(node, start, end);
 	if(ret.failed())
 		return ret.rethrow();
 
@@ -179,49 +179,49 @@ ubiq::GenericError MockFs::newFile(Node& node, const char* start, const char* en
 	return true;
 }
 
-ubiq::GenericError MockFs::removeNode(Node& node)
+pet::GenericError MockFs::removeNode(Node& node)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::writeError();
+		return pet::GenericError::writeError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(!node.entry->parent) // cannot remove root
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(node.entry->isDir() && !((Directory*)node.entry)->children.empty())
-		return ubiq::GenericError::notEmptyError();
+		return pet::GenericError::notEmptyError();
 
 	auto &children = node.entry->parent->children;
 	auto x = std::find(children.begin(), children.end(), node.entry);
 
 	if(x == children.end())
-		return ubiq::GenericError::noSuchEntryError();
+		return pet::GenericError::noSuchEntryError();
 
 	children.erase(x);
 
 	return true;
 }
 
-ubiq::GenericError MockFs::openStream(Node& node, Stream& stream)
+pet::GenericError MockFs::openStream(Node& node, Stream& stream)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!node.entry)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(node.entry->isDir())
-		return ubiq::GenericError::isDirectoryError();
+		return pet::GenericError::isDirectoryError();
 
 	stream.file = (File*)node.entry;
 	return true;
 }
 
-ubiq::GenericError MockFs::flushStream(Stream&) {
+pet::GenericError MockFs::flushStream(Stream&) {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	return true;
 }
@@ -249,13 +249,13 @@ MockFs::NodeId MockFs::Node::getId() {
 	return (NodeId)entry;
 }
 
-ubiq::GenericError MockFs::Stream::read(void* &content, unsigned int size)
+pet::GenericError MockFs::Stream::read(void* &content, unsigned int size)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	if(!file)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(offset >= file->data.size())
 		return 0;
@@ -269,13 +269,13 @@ ubiq::GenericError MockFs::Stream::read(void* &content, unsigned int size)
 	return size;
 }
 
-ubiq::GenericError MockFs::Stream::write(void* &content, unsigned int size)
+pet::GenericError MockFs::Stream::write(void* &content, unsigned int size)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::writeError();
+		return pet::GenericError::writeError();
 
 	if(!file)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	while(file->data.size() < offset + size)
 		file->data.push_back('\0');
@@ -285,13 +285,13 @@ ubiq::GenericError MockFs::Stream::write(void* &content, unsigned int size)
 	return size;
 }
 
-ubiq::GenericError MockFs::Stream::setPosition(Whence whence, int reqOffset)
+pet::GenericError MockFs::Stream::setPosition(Whence whence, int reqOffset)
 {
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::writeError();
+		return pet::GenericError::writeError();
 
 	if(!file)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	int newOffset;
 	switch(whence) {
@@ -307,20 +307,20 @@ ubiq::GenericError MockFs::Stream::setPosition(Whence whence, int reqOffset)
 	}
 
 	if(newOffset < 0 || newOffset > file->data.size())
-		return ubiq::GenericError::invalidSeekError();
+		return pet::GenericError::invalidSeekError();
 
 	offset = newOffset;
 
 	return true;
 }
 
-ubiq::GenericError MockFs::Stream::flush()
+pet::GenericError MockFs::Stream::flush()
 {
 	if(!file)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(FsFailureSource::shouldFail())
-		return ubiq::GenericError::writeError();
+		return pet::GenericError::writeError();
 
 	return true;
 }
@@ -332,7 +332,7 @@ unsigned int MockFs::Stream::getPosition() {
 unsigned int MockFs::Stream::getSize()
 {
 	if(!file)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	return file->data.size();
 }

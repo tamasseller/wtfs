@@ -22,16 +22,16 @@
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template <class IndexComparator, class KeyComparator, class MatchHandler>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::
 checkTable(ROSession &session, const typename Storage::Address& address, Key &key, Value &value, MatchHandler &matchHandler){
 	void *ret = this->read(session, address);
 
 	if(!ret)
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	Table* table = (Table*) ret;
 
-	algorithm::Bisect::Result position = algorithm::Bisect::
+	pet::Bisect::Result position = pet::Bisect::
 			find<Element, Key, KeyComparator>(table->elements, table->length(), key);
 
 	if (position.present()) {
@@ -49,7 +49,7 @@ checkTable(ROSession &session, const typename Storage::Address& address, Key &ke
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template <class IndexComparator, class KeyComparator, class MatchHandler>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::search(Key &key, Value &value, MatchHandler &matchHandler)
 {
 
@@ -57,7 +57,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 	if(!levels){
 		if(root != InvalidAddress) {
-			ubiq::GenericError ret = checkTable<IndexComparator, KeyComparator, MatchHandler>(session, root, key, value, matchHandler);
+			pet::GenericError ret = checkTable<IndexComparator, KeyComparator, MatchHandler>(session, root, key, value, matchHandler);
 			this->closeReadOnlySession(session);
 			return ret;
 		}
@@ -66,11 +66,11 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 		BTree::Iterator iterator(indexKey);
 		if(iterate<IndexComparator>(session, iterator).failed()) {
 			this->closeReadOnlySession(session);
-			return ubiq::GenericError::outOfMemoryError();
+			return pet::GenericError::outOfMemoryError();
 		}
 
 		while(iterator.currentAddress != Storage::InvalidAddress) {
-			ubiq::GenericError ret = checkTable<IndexComparator, KeyComparator, MatchHandler>(session, iterator.currentAddress, key, value, matchHandler);
+			pet::GenericError ret = checkTable<IndexComparator, KeyComparator, MatchHandler>(session, iterator.currentAddress, key, value, matchHandler);
 
 			if(ret.failed()) {
 				this->closeReadOnlySession(session);
@@ -84,7 +84,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 			if(step<IndexComparator>(session, iterator).failed()) {
 				this->closeReadOnlySession(session);
-				return ubiq::GenericError::outOfMemoryError();
+				return pet::GenericError::outOfMemoryError();
 			}
 		}
 	}
@@ -95,7 +95,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template <class IndexComparator, class KeyComparator, class MatchHandler>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::search(Key &key, Value &value)
 {
 	MatchHandler matchHandler;
@@ -103,10 +103,10 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::get(Key &key, Value &value)
 {
-	return search<FullComparator, algorithm::Bisect::DefaultComparator<Element, Key>>(key, value);
+	return search<FullComparator, pet::Bisect::DefaultComparator<Element, Key>>(key, value);
 }
 
 #endif /* SEARCH_H_ */

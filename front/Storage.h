@@ -61,7 +61,7 @@ public:
 
 	class ReadWriteSession: public ReadOnlySession {
 		friend StorageBase;
-		mm::DynamicFifo<Address, Allocator, 4> garbage, newish;
+		pet::DynamicFifo<Address, Allocator, 4> garbage, newish;
 	public:
 		inline ReadWriteSession(StorageBase* self);
 	};

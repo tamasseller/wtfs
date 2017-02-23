@@ -56,7 +56,7 @@ inline void BTree<Storage, Key, IndexKey, Value, Allocator>
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template <class Comparator>
-inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+inline pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::stepDown(ROSession &session, Iterator& iterator, Address address, uint32_t level) {
 	BtreeTrace::assert(level > 0);
 	int32_t rootNum = 0;
@@ -64,19 +64,19 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 		void *ret = (Node*) this->read(session, address);
 
 		if(!ret)
-			return ubiq::GenericError::readError();
+			return pet::GenericError::readError();
 
 		Node* index = (Node*) ret;
 
 		if(!rootNum)
 			rootNum = index->length();
 
-		algorithm::Bisect::Result pos = algorithm::Bisect::
+		pet::Bisect::Result pos = pet::Bisect::
 				find<IndexKey, IndexKey, Comparator>(index->values, index->numBranches - 1, iterator.key);
 
 		if(iterator.locator.acquire().failed()) {
 			this->release(session, index);
-			return ubiq::GenericError::outOfMemoryError();
+			return pet::GenericError::outOfMemoryError();
 		}
 
 		iterator.locator.current()->address = address;
@@ -103,14 +103,14 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template <class Comparator>
-inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+inline pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::step(ROSession &session, Iterator& iterator)
  {
 	if (iterator.locator.current()->hasMore()) {
 		void *ret = this->read(session, iterator.locator.current()->address);
 
 		if(!ret)
-			return ubiq::GenericError::readError();
+			return pet::GenericError::readError();
 
 		Node* index = (Node*) ret;
 
@@ -130,7 +130,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 				void *ret = this->read(session, iterator.locator.current()->address);
 
 				if(!ret)
-					return ubiq::GenericError::readError();
+					return pet::GenericError::readError();
 
 				Node* index = (Node*) ret;
 
@@ -152,7 +152,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template <class Comparator>
-inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+inline pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::iterate(ROSession &session, Iterator& iterator)
  {
 	while(iterator.locator.release()) {}

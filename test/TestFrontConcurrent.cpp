@@ -62,7 +62,7 @@ struct TestBase {
 
 	bool bad = false;
 
-	void requireNoError(ubiq::GenericError &&result) {
+	void requireNoError(pet::GenericError &&result) {
 		if(result.failed())
 			bad = true;
 	}

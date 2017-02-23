@@ -36,7 +36,7 @@
 #include "Storage.h"
 #include "ConfigHelpers.h"
 
-class WtfsTrace: public ubiq::Trace<WtfsTrace> {};
+class WtfsTrace: public pet::Trace<WtfsTrace> {};
 
 template<class T>
 class WtfsTestHelper;
@@ -80,7 +80,7 @@ private:
 		friend WtfsTestHelper<Config>;
 		friend WtfsMain;
 		friend BlobStore;
-		friend container::LinkedList<Node>;
+		friend pet::LinkedList<Node>;
 		FullKey key;
 		WtfsMain* fs;
 		bool dirty;
@@ -116,34 +116,34 @@ public:
 		uint32_t updateCounter = 1;
 
 		Mutex nodeListLock;
-		container::LinkedList<Node> openNodes;
+		pet::LinkedList<Node> openNodes;
 		bool inGc = false;
 		bool isReadonly = false;
 		WtfsEcosystem::Node tempNode;
 
 		template<bool isDir>
-		inline ubiq::GenericError addNew(Node&, const char*, const char*);
+		inline pet::GenericError addNew(Node&, const char*, const char*);
 
-		inline ubiq::GenericError moveAroundMetaPages(typename FlashDriver::Address const page, uint32_t usedPages);
-		inline ubiq::GenericError moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages);
-		inline ubiq::GenericError collectGarbage();
+		inline pet::GenericError moveAroundMetaPages(typename FlashDriver::Address const page, uint32_t usedPages);
+		inline pet::GenericError moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages);
+		inline pet::GenericError collectGarbage();
 	protected:
-		inline ubiq::GenericError fetchById(Node& node, NodeId parent, NodeId id);
+		inline pet::GenericError fetchById(Node& node, NodeId parent, NodeId id);
 	public:
 		inline void bind(Buffers*);
-		ubiq::GenericError initialize(bool purge=false);
-		ubiq::GenericError fetchRoot(Node&);
-		ubiq::GenericError fetchChildByName(Node&, const char*, const char*);
-		ubiq::GenericError fetchChildById(Node&, NodeId);
-		ubiq::GenericError fetchFirstChild(Node&);
-		ubiq::GenericError fetchNextSibling(Node&);
-		ubiq::GenericError newDirectory(Node&, const char*, const char*);
-		ubiq::GenericError newFile(Node&, const char*, const char*);
-		ubiq::GenericError removeNode(Node&);
+		pet::GenericError initialize(bool purge=false);
+		pet::GenericError fetchRoot(Node&);
+		pet::GenericError fetchChildByName(Node&, const char*, const char*);
+		pet::GenericError fetchChildById(Node&, NodeId);
+		pet::GenericError fetchFirstChild(Node&);
+		pet::GenericError fetchNextSibling(Node&);
+		pet::GenericError newDirectory(Node&, const char*, const char*);
+		pet::GenericError newFile(Node&, const char*, const char*);
+		pet::GenericError removeNode(Node&);
 
-		ubiq::GenericError openStream(Node&, Stream&);
-		ubiq::GenericError flushStream(Stream&);
-		ubiq::GenericError closeStream(Stream&);
+		pet::GenericError openStream(Node&, Stream&);
+		pet::GenericError flushStream(Stream&);
+		pet::GenericError closeStream(Stream&);
 
 		class Stream {
 		private:
@@ -152,8 +152,8 @@ public:
 			void *buffer;
 			bool written;
 
-			ubiq::GenericError fetchPage();
-			ubiq::GenericError access(void* &content, uint32_t size);
+			pet::GenericError fetchPage();
+			pet::GenericError access(void* &content, uint32_t size);
 
 			friend WtfsMain;
 			inline void initialize(Node *tree);
@@ -164,10 +164,10 @@ public:
 				Start, Current, End
 			};
 
-			ubiq::GenericError read(void* &content, uint32_t size);
-			ubiq::GenericError write(void* &content, uint32_t size);
-			ubiq::GenericError setPosition(Whence whence, int32_t offset);
-			ubiq::GenericError flush();
+			pet::GenericError read(void* &content, uint32_t size);
+			pet::GenericError write(void* &content, uint32_t size);
+			pet::GenericError setPosition(Whence whence, int32_t offset);
+			pet::GenericError flush();
 
 			inline uint32_t getPosition();
 			inline uint32_t getSize();
@@ -193,7 +193,7 @@ struct WtfsTestHelper {
 	using MetaTree    = typename WtfsEcosystem<Config>::MetaTree;
 
 	template<class Callback>
-	static ubiq::GenericError traverseNode(Node &node, Callback &&c) {
+	static pet::GenericError traverseNode(Node &node, Callback &&c) {
 		typename WtfsTestHelper<Config>::BlobStore::ReadWriteSession session(&node);
 		return node.traverse(session, c);
 	}

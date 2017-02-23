@@ -24,7 +24,7 @@
 
 #include "ubiquitous/Trace.h"
 
-class BlobTreeTrace: public ubiq::Trace<BlobTreeTrace> {};
+class BlobTreeTrace: public pet::Trace<BlobTreeTrace> {};
 
 #include "Helper.h"
 #include "ubiquitous/Error.h"
@@ -41,13 +41,13 @@ protected:
 	uint32_t size;
 
 	template<class Callback>
-	ubiq::GenericError traverse(RWSession &session, Callback &&);
+	pet::GenericError traverse(RWSession &session, Callback &&);
 public:
 	inline BlobTree(Address fileRoot, uint32_t size);
 
-	ubiq::FailPointer<void> empty();
-	ubiq::FailPointer<void> read(uint32_t page);
-	ubiq::GenericError update(uint32_t page, uint32_t newSize, void*);
+	pet::FailPointer<void> empty();
+	pet::FailPointer<void> read(uint32_t page);
+	pet::GenericError update(uint32_t page, uint32_t newSize, void*);
 	void release(void*);
 
 	uint32_t getSize();
@@ -59,10 +59,10 @@ public:
 		bool lastEntryOnLevel;
 	};
 
-	typedef mm::DynamicStack<State, Allocator, predLevelCount> Traversor;
+	typedef pet::DynamicStack<State, Allocator, predLevelCount> Traversor;
 
-	ubiq::GenericError dispose();
-	ubiq::GenericError relocate(Address &page);
+	pet::GenericError dispose();
+	pet::GenericError relocate(Address &page);
 };
 
 #include "TreeOperations.h"

@@ -160,10 +160,10 @@ inline typename BTree<Storage, Key, IndexKey, Value, Allocator>::FailAddress BTr
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template<bool updateAllowed, bool insertAllowed>
-inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+inline pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::write(const Key &key, const Value &value) {
 	Table* table = 0;
-	algorithm::Bisect::Result position;
+	pet::Bisect::Result position;
 	uint32_t length;
 
 	RWSession session(this);
@@ -180,7 +180,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 		void *ret = this->empty(session, 0);
 		if(!ret) {
 			this->closeReadWriteSession(session);
-			return ubiq::GenericError::writeError();
+			return pet::GenericError::writeError();
 		}
 
 		table = (Table *)ret;
@@ -191,7 +191,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 		Address newAddress = this->Storage::write(session, table);
 		if(newAddress == Storage::InvalidAddress) {
 			this->closeReadWriteSession(session);
-			return ubiq::GenericError::writeError();
+			return pet::GenericError::writeError();
 		}
 
 		root = newAddress;
@@ -202,12 +202,12 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 			if(!ret) {
 				this->closeReadWriteSession(session);
-				return ubiq::GenericError::readError();
+				return pet::GenericError::readError();
 			}
 
 			table = (Table*) ret;
 			length = table->length();
-			position = algorithm::Bisect::find(table->elements, length, key);
+			position = pet::Bisect::find(table->elements, length, key);
 
 			if (position.present()) {
 				if(updateAllowed){
@@ -219,7 +219,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 					Address newAddress = this->Storage::write(session, table);
 					if(newAddress == Storage::InvalidAddress) {
 						this->closeReadWriteSession(session);
-						return ubiq::GenericError::writeError();
+						return pet::GenericError::writeError();
 					}
 
 					root = newAddress;
@@ -233,12 +233,12 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 				if(insertAllowed){
 					this->upgrade(session);
 					if (length == Table::maxElements) {
-						ubiq::FailPointer<Table> ret = splitTable(session, *table, position.insertionIndex(), key, value);
+						pet::FailPointer<Table> ret = splitTable(session, *table, position.insertionIndex(), key, value);
 
 						if(ret.failed()) {
 							this->release(session, table);
 							this->rollback(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						Table *newTable = ret;
@@ -248,20 +248,20 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 						if(newTableAddress == Storage::InvalidAddress) {
 							this->release(session, table);
 							this->rollback(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						Address tableNewAddress = this->Storage::write(session, table);
 						if(tableNewAddress == Storage::InvalidAddress) {
 							this->rollback(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						FailAddress newRoot = createRootNode(session, hash, tableNewAddress, newTableAddress, levels);
 
 						if(newRoot.failed()) {
 							this->rollback(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						levels++;
@@ -274,7 +274,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 						Address newAddress = this->Storage::write(session, table);
 						if(newAddress == Storage::InvalidAddress) {
 							this->closeReadWriteSession(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						root = newAddress;
@@ -293,7 +293,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 			if(iterate<FullComparator>(session, location).failed()) {
 				this->closeReadWriteSession(session);
-				return ubiq::GenericError::outOfMemoryError();
+				return pet::GenericError::outOfMemoryError();
 			}
 
 			Address place = InvalidAddress;
@@ -305,14 +305,14 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 				if(!ret) {
 					this->closeReadWriteSession(session);
-					return ubiq::GenericError::readError();
+					return pet::GenericError::readError();
 				}
 
 				table = (Table*) ret;
 
 				length = table->length();
 
-				position = algorithm::Bisect::find(table->elements, length, key);
+				position = pet::Bisect::find(table->elements, length, key);
 
 				if (position.present()) {
 					if(updateAllowed){
@@ -323,14 +323,14 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 						Address newAddress = this->Storage::write(session, table);
 						if(newAddress == Storage::InvalidAddress) {
 							this->closeReadWriteSession(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						FailAddress newRoot = updateOne(session, location.locator, newAddress);
 
 						if(newRoot.failed()) {
 							this->rollback(session);
-							return ubiq::GenericError::writeError();
+							return pet::GenericError::writeError();
 						}
 
 						root = newRoot;
@@ -350,7 +350,7 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 					if(step<FullComparator>(session, location).failed()) {
 						this->release(session, table);
 						this->closeReadWriteSession(session);
-						return ubiq::GenericError::outOfMemoryError();
+						return pet::GenericError::outOfMemoryError();
 					}
 				}
 				else {
@@ -359,14 +359,14 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 							if(iterate<FullComparator>(session, location).failed()) {
 								this->release(session, table);
 								this->closeReadWriteSession(session);
-								return ubiq::GenericError::outOfMemoryError();
+								return pet::GenericError::outOfMemoryError();
 							}
 
 							while(location.currentAddress != place) {
 								if(step<FullComparator>(session, location).failed()) {
 									this->release(session, table);
 									this->closeReadWriteSession(session);
-									return ubiq::GenericError::outOfMemoryError();
+									return pet::GenericError::outOfMemoryError();
 								}
 							}
 
@@ -376,24 +376,24 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 							if(!ret) {
 								this->closeReadWriteSession(session);
-								return ubiq::GenericError::readError();
+								return pet::GenericError::readError();
 							}
 
 							table = (Table*) ret;
 
 
 							length = table->length();
-							position = algorithm::Bisect::find(table->elements, length, key);
+							position = pet::Bisect::find(table->elements, length, key);
 						}
 
 						if (length == Table::maxElements) {
 							this->upgrade(session);
-							ubiq::FailPointer<Table> ret = splitTable(session, *table, position.insertionIndex(), key, value);
+							pet::FailPointer<Table> ret = splitTable(session, *table, position.insertionIndex(), key, value);
 
 							if(ret.failed()) {
 								this->release(session, table);
 								this->rollback(session);
-								return ubiq::GenericError::writeError();
+								return pet::GenericError::writeError();
 							}
 
 							Table *newTable = ret;
@@ -403,20 +403,20 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 							if(newTableAddress == Storage::InvalidAddress) {
 								this->release(session, table);
 								this->rollback(session);
-								return ubiq::GenericError::writeError();
+								return pet::GenericError::writeError();
 							}
 
 							Address tableNewAddress = this->Storage::write(session, table);
 							if(tableNewAddress == Storage::InvalidAddress) {
 								this->rollback(session);
-								return ubiq::GenericError::writeError();
+								return pet::GenericError::writeError();
 							}
 
 							FailAddress newRoot = splitEntry(session, location.locator, hash, tableNewAddress, newTableAddress);
 
 							if(newRoot.failed()) {
 								this->rollback(session);
-								return ubiq::GenericError::writeError();
+								return pet::GenericError::writeError();
 							}
 
 							root = newRoot;
@@ -428,14 +428,14 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 							Address newAddress = this->Storage::write(session, table);
 							if(newAddress == Storage::InvalidAddress) {
 								this->closeReadWriteSession(session);
-								return ubiq::GenericError::writeError();
+								return pet::GenericError::writeError();
 							}
 
 							FailAddress newRoot = updateOne(session, location.locator, newAddress);
 
 							if(newRoot.failed()) {
 								this->rollback(session);
-								return ubiq::GenericError::writeError();
+								return pet::GenericError::writeError();
 							}
 
 							root = newRoot;
@@ -458,17 +458,17 @@ inline ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::put(const Key &key, const Value &value) {
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::put(const Key &key, const Value &value) {
 	return write<true, true>(key, value);
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::insert(const Key &key, const Value &value) {
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::insert(const Key &key, const Value &value) {
 	return write<false, true>(key, value);
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::update(const Key &key, const Value &value) {
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::update(const Key &key, const Value &value) {
 	return write<true, false>(key, value);
 }
 

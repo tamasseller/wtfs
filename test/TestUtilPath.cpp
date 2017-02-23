@@ -59,7 +59,7 @@ TEST(FooBarStraight, findFoo) {
 	Path<MockFs, FailableAllocator> path;
 	MockFs::Node node;
 
-	ubiq::GenericError res = path.append(test->fs, node, "/foo");
+	pet::GenericError res = path.append(test->fs, node, "/foo");
 	CHECK(!res.failed());
 	if(!res.failed()) {
 		const char *start, *end;
@@ -72,7 +72,7 @@ TEST(FooBarStraight, findBar) {
 	Path<MockFs, FailableAllocator> path;
 	MockFs::Node node;
 
-	ubiq::GenericError res = path.append(test->fs, node, "/foo/bar");
+	pet::GenericError res = path.append(test->fs, node, "/foo/bar");
 	CHECK(!res.failed());
 	if(!res.failed()) {
 		const char *start, *end;
@@ -86,10 +86,10 @@ TEST(FooBarStraight, findBarMultipart) {
 	MockFs::Node node;
 
 	const char* pathName = "/foo/bar";
-	ubiq::GenericError res = path.append(test->fs, node, pathName, pathName+4);
+	pet::GenericError res = path.append(test->fs, node, pathName, pathName+4);
 	CHECK(!res.failed());
 	if(!res.failed()) {
-		ubiq::GenericError res = path.append(test->fs, node, pathName+4, pathName+8);
+		pet::GenericError res = path.append(test->fs, node, pathName+4, pathName+8);
 		CHECK(!res.failed());
 		if(!res.failed()) {
 			const char *start, *end;
@@ -103,7 +103,7 @@ TEST(FooBarStraight, findFooStepBack) {
 	Path<MockFs, FailableAllocator> path;
 	MockFs::Node node;
 
-	ubiq::GenericError res = path.append(test->fs, node, "/foo/../foo");
+	pet::GenericError res = path.append(test->fs, node, "/foo/../foo");
 	CHECK(!res.failed());
 	if(!res.failed()) {
 		const char *start, *end;
@@ -146,7 +146,7 @@ TEST(FooBarStraight, failSillyDot) {
 TEST(FooBarStraight, funnyPath) {
 	Path<MockFs, FailableAllocator> path;
 	MockFs::Node node;
-	ubiq::GenericError res = path.append(test->fs, node, "//../..///foo/../../foo/.//bar/");
+	pet::GenericError res = path.append(test->fs, node, "//../..///foo/../../foo/.//bar/");
 	CHECK(!res.failed());
 	if(!res.failed()) {
 		const char *start, *end;

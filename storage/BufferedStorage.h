@@ -29,7 +29,7 @@ enum BufferReleaseCondition {
 		Dirty, Clean, Purge
 };
 
-class BufferedStorageTrace: public ubiq::Trace<BufferedStorageTrace> {};
+class BufferedStorageTrace: public pet::Trace<BufferedStorageTrace> {};
 
 template <class FlashDriver, class StorageManager, class Mutex, uint32_t nBuffers>
 class BufferedStorage: BufferedStorageTrace {
