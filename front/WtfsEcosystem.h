@@ -153,7 +153,7 @@ public:
 			bool written;
 
 			pet::GenericError fetchPage();
-			pet::GenericError access(void* &content, uint32_t size);
+			pet::GenericError access(void* &content, uint32_t size, bool reading);
 
 			friend WtfsMain;
 			inline void initialize(Node *tree);

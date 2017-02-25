@@ -149,7 +149,7 @@ WtfsEcosystem<Config>::WtfsMain::Stream::flush()
 
 template<class Config>
 pet::GenericError
-WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size)
+WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size, bool reading)
 {
 	if(offset == BlobStore::pageSize) {
 		pet::GenericError ret = flush();
@@ -161,7 +161,8 @@ WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size)
 		offset = 0;
 	}
 
-	const uint32_t spaceLeft = BlobStore::pageSize - offset;
+	bool lastPage = (node->getSize() - 1) / BlobStore::pageSize == page;
+	const uint32_t spaceLeft = ((reading && lastPage)? (getSize() % BlobStore::pageSize) :  BlobStore::pageSize ) - offset;
 	if(size > spaceLeft)
 		size = spaceLeft;
 
@@ -199,7 +200,7 @@ WtfsEcosystem<Config>::WtfsMain::Stream::read(void* &content, uint32_t size)
 	if(!size)
 		return 0;
 
-	return access(content, size);
+	return access(content, size, true);
 }
 
 template<class Config>
@@ -209,7 +210,7 @@ WtfsEcosystem<Config>::WtfsMain::Stream::write(void* &content, uint32_t size)
 	if(!size)
 		return 0;
 
-	pet::GenericError ret = access(content, size);
+	pet::GenericError ret = access(content, size, false);
 
 	if(ret.failed())
 		return ret.rethrow();
