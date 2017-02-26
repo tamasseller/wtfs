@@ -161,8 +161,17 @@ WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size, b
 		offset = 0;
 	}
 
-	bool lastPage = (node->getSize() - 1) / BlobStore::pageSize == page;
-	const uint32_t spaceLeft = ((reading && lastPage)? (getSize() % BlobStore::pageSize) :  BlobStore::pageSize ) - offset;
+	uint32_t spaceLeft = BlobStore::pageSize - offset;
+
+	if(reading) {
+		const uint32_t lastByteIdx = node->getSize() - 1;
+		const uint32_t lastPageIdx = lastByteIdx / BlobStore::pageSize;
+		if (lastPageIdx == page) {
+			const uint32_t lastDataByteIdxOnLastPage = lastByteIdx % BlobStore::pageSize;
+			spaceLeft = lastDataByteIdxOnLastPage + 1 - offset;
+		}
+	}
+
 	if(size > spaceLeft)
 		size = spaceLeft;
 

@@ -268,7 +268,7 @@ TEST(Integration, Replicate) {
 				void *wtfsBuff;
 				pet::GenericError res = stream.read(wtfsBuff, size);
 
-				if(res.failed())
+				if(res.failed() || !res)
 					return;
 
 				unsigned int readable = res;
