@@ -27,7 +27,7 @@
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
 template<class ElementCallback>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 ::traverse(RWSession &session, ElementCallback&& callback)
 {
 	Traversor stack;
@@ -46,7 +46,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 
 		while(1) {
 			if(stack.acquire().failed())
-				return ubiq::GenericError::outOfMemoryError();
+				return pet::GenericError::outOfMemoryError();
 
 			*stack.current() = currAddress;
 
@@ -56,7 +56,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 			void* ret = this->read(session, currAddress);
 
 			if(!ret)
-				return ubiq::GenericError::readError();
+				return pet::GenericError::readError();
 
 			currAddress = ((Node*)ret)->children[0];
 
@@ -70,7 +70,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 				void* ret = this->read(session, currAddress);
 
 				if(!ret)
-					return ubiq::GenericError::readError();
+					return pet::GenericError::readError();
 
 				Node *node = (Node*)ret;
 				for(uint32_t i = 0; i < node->length(); i++) {
@@ -99,7 +99,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 				void* ret = this->read(session, *stack.current());
 
 				if(!ret)
-					return ubiq::GenericError::readError();
+					return pet::GenericError::readError();
 
 				Node *node = (Node*)ret;
 
@@ -130,7 +130,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 					this->release(session, node);
 
 					if(stack.acquire().failed())
-						return ubiq::GenericError::outOfMemoryError();
+						return pet::GenericError::outOfMemoryError();
 
 					*stack.current() = nextChild;
 					currLevel--;
@@ -144,7 +144,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 			void *rret = this->Storage::read(session, *stack.current());
 
 			if(!rret)
-				return ubiq::GenericError::readError();
+				return pet::GenericError::readError();
 
 			Node *node = (Node *)rret;
 
@@ -165,7 +165,7 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 			auto wret = this->Storage::write(session, (void*)node);
 
 			if(wret == Storage::InvalidAddress)
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 
 			newAddress = wret;
 			currAddress = *stack.current();
@@ -180,12 +180,12 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::purge()
+pet::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::purge()
 {
 	RWSession rwSession(this);
 	this->upgrade(rwSession);
 
-	ubiq::GenericError ret = traverse(rwSession, [&](Address addr, uint32_t level, const Traversor &parents) -> Address {
+	pet::GenericError ret = traverse(rwSession, [&](Address addr, uint32_t level, const Traversor &parents) -> Address {
 		this->disposeAddress(rwSession, addr);
 		return addr;
 	});
@@ -204,13 +204,13 @@ ubiq::GenericError BTree<Storage, Key, IndexKey, Value, Allocator>::purge()
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-inline ubiq::GenericError
+inline pet::GenericError
 BTree<Storage, Key, IndexKey, Value, Allocator>::relocate(Address &page)
 {
 	RWSession session(this);
 	this->upgrade(session);
 
-	ubiq::GenericError res = this->traverse(session, [&](Address addr, uint32_t level, const Traversor&) -> Address {
+	pet::GenericError res = this->traverse(session, [&](Address addr, uint32_t level, const Traversor&) -> Address {
 		if(addr == page) {
 			void* ret = this->read(session, addr);
 

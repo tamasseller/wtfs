@@ -27,7 +27,7 @@
 template<class Config>
 inline void WtfsEcosystem<Config>::Node::getName(const char*&start, const char*&end) {
 	start = key.name;
-	end = key.name + algorithm::Str::nLength(key.name, Config::maxFilenameLength);
+	end = key.name + pet::Str::nLength(key.name, Config::maxFilenameLength);
 }
 
 template<class Config>
@@ -42,7 +42,7 @@ WtfsEcosystem<Config>::Node::getId() {
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::fetchRoot(Node& node)
 {
 	static const char* emptyString = "";
@@ -54,22 +54,22 @@ WtfsEcosystem<Config>::WtfsMain::fetchRoot(Node& node)
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::fetchChildByName(Node& node, const char* start, const char* end) {
 	if(node.key.id == -1u)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(!end)
 		end = start + strlen(start);
 
 	node.key.set(start, end, node.key.id);
-	ubiq::GenericError ret = this->template get(node.key, node);
+	pet::GenericError ret = this->template get(node.key, node);
 
 	if(ret.failed())
 		return ret.rethrow();
 
 	if(!ret)
-		return ubiq::GenericError::noSuchEntryError();
+		return pet::GenericError::noSuchEntryError();
 
 	return ret;
 }
@@ -105,25 +105,25 @@ public:
 };
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::fetchFirstChild(Node& node)
 {
 	if(node.key.id == -1u)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(node.hasData())
-		return ubiq::GenericError::isNotDirectoryError();
+		return pet::GenericError::isNotDirectoryError();
 
 	node.key.indexed.parentId = node.key.id;
 	return this->template search<ParentIndexComparator<Config>, ParentKeyComparator<Config> >(node.key, node);
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 inline WtfsEcosystem<Config>::WtfsMain::fetchById(Node& node, NodeId parent, NodeId id)
 {
 	if(node.key.id == -1u)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	typedef typename MetaTree::Element Element;
 	struct MatchHandler {
@@ -145,19 +145,19 @@ inline WtfsEcosystem<Config>::WtfsMain::fetchById(Node& node, NodeId parent, Nod
 	node.key.id = id;
 
 	MatchHandler handler;
-	ubiq::GenericError ret = this->template search<ParentIndexComparator<Config>, ParentKeyComparator<Config>, MatchHandler>(node.key, node, handler);
+	pet::GenericError ret = this->template search<ParentIndexComparator<Config>, ParentKeyComparator<Config>, MatchHandler>(node.key, node, handler);
 
 	if(ret.failed())
 		return ret.rethrow();
 
 	if(!ret)
-		return ubiq::GenericError::noSuchEntryError();
+		return pet::GenericError::noSuchEntryError();
 
 	return ret;
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::fetchChildById(Node& node, NodeId id)
 {
 	return fetchById(node, node.key.id, id);
@@ -165,11 +165,11 @@ WtfsEcosystem<Config>::WtfsMain::fetchChildById(Node& node, NodeId id)
 
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::fetchNextSibling(Node& node)
 {
 	if(node.key.id == -1u)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	struct NextSiblingComparator: ParentKeyComparator<Config> {
 	public:
@@ -185,17 +185,17 @@ WtfsEcosystem<Config>::WtfsMain::fetchNextSibling(Node& node)
 
 template<class Config>
 template<bool isFile>
-ubiq::GenericError
+pet::GenericError
 inline WtfsEcosystem<Config>::WtfsMain::addNew(Node& node, const char* start, const char* end)
 {
 	if(node.key.id == -1u)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(node.hasData())
-			return ubiq::GenericError::isNotDirectoryError();
+			return pet::GenericError::isNotDirectoryError();
 
 	if(isReadonly)
-		return ubiq::GenericError::readOnlyFsError();
+		return pet::GenericError::readOnlyFsError();
 
 	node.key.set(start, end, node.key.id);
 
@@ -203,7 +203,7 @@ inline WtfsEcosystem<Config>::WtfsMain::addNew(Node& node, const char* start, co
 	node.key.id = maxId;
 	node.initialize(isFile);
 
-	ubiq::GenericError ret = this->insert(node.key, node);
+	pet::GenericError ret = this->insert(node.key, node);
 
 	if(ret.failed()) {
 		maxIdLock.unlock();
@@ -215,36 +215,36 @@ inline WtfsEcosystem<Config>::WtfsMain::addNew(Node& node, const char* start, co
 		maxIdLock.unlock();
 	} else {
 		maxIdLock.unlock();
-		return ubiq::GenericError::alreadyExistsError();
+		return pet::GenericError::alreadyExistsError();
 	}
 
 	return ret;
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::newDirectory(Node& node, const char* start, const char* end) {
 	return addNew<false>(node, start, end);
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::newFile(Node& node, const char* start, const char* end) {
 	return addNew<true>(node, start, end);
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::removeNode(Node& node)
 {
 	if(node.key.id == 0 || node.key.id == -1u)
-		return ubiq::GenericError::invalidArgumentError();
+		return pet::GenericError::invalidArgumentError();
 
 	if(isReadonly)
-		return ubiq::GenericError::readOnlyFsError();
+		return pet::GenericError::readOnlyFsError();
 
 	if(node.hasData()) {
-		ubiq::GenericError ret = node.dispose();
+		pet::GenericError ret = node.dispose();
 
 		if(ret.failed())
 			return ret.rethrow();
@@ -252,27 +252,27 @@ WtfsEcosystem<Config>::WtfsMain::removeNode(Node& node)
 		NodeId current = node.key.id;
 		NodeId parentId = node.key.indexed.parentId;
 
-		ubiq::GenericError ret = fetchFirstChild(node);
+		pet::GenericError ret = fetchFirstChild(node);
 
 		if(ret.failed())
 			return ret.rethrow();
 
 		if(ret)
-			return ubiq::GenericError::notEmptyError();
+			return pet::GenericError::notEmptyError();
 
-		ubiq::GenericError ret2 = fetchById(node, parentId, current);
+		pet::GenericError ret2 = fetchById(node, parentId, current);
 
 		if(ret2.failed())
 			return ret2.rethrow();
 	}
 
-	ubiq::GenericError ret = this->remove(node.key, 0);
+	pet::GenericError ret = this->remove(node.key, 0);
 
 	if(ret.failed())
 		return ret.rethrow();
 
 	if(!ret)
-		return ubiq::GenericError::noSuchEntryError();
+		return pet::GenericError::noSuchEntryError();
 
 	return ret;
 }

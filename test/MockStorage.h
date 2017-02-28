@@ -88,7 +88,7 @@ struct StorageFailureSource: public StaticFailureSource<StorageFailureSource> {
  * expected to be committed.
  */
 template<unsigned int pageSizeParam, class Client, bool strict=true, bool checkRoot = true>
-struct MockStorage: protected ubiq::Trace<MockStorageTrace> {
+struct MockStorage: protected pet::Trace<MockStorageTrace> {
 	////////////////////////////////////////////////////////////////
 	// These are the required definitions mentioned above
 	////////////////////////////////////////////////////////////////

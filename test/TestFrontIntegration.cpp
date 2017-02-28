@@ -146,7 +146,7 @@ TEST_GROUP(Integration) {
 		Fs::Node node;
 		std::vector<std::string> contents;
 
-		ubiq::GenericError res = fs.fetchFirstChild(node);
+		pet::GenericError res = fs.fetchFirstChild(node);
 
 		if(res.failed())
 			return;
@@ -156,7 +156,7 @@ TEST_GROUP(Integration) {
 			node.getName(from, to);
 			contents.push_back(std::string(from, to-from));
 
-			ubiq::GenericError res = fs.fetchFirstChild(node);
+			pet::GenericError res = fs.fetchFirstChild(node);
 
 			if(res.failed())
 				return;
@@ -226,7 +226,7 @@ TEST(Integration, Replicate) {
 
 			while(1) {
 				void *buff;
-				ubiq::GenericError res = stream.write(buff, size);
+				pet::GenericError res = stream.write(buff, size);
 				CHECK(!res.failed());
 
 				if(res.failed())
@@ -266,9 +266,9 @@ TEST(Integration, Replicate) {
 
 			while(1) {
 				void *wtfsBuff;
-				ubiq::GenericError res = stream.read(wtfsBuff, size);
+				pet::GenericError res = stream.read(wtfsBuff, size);
 
-				if(res.failed())
+				if(res.failed() || !res)
 					return;
 
 				unsigned int readable = res;
@@ -306,7 +306,7 @@ TEST(Integration, Replicate) {
 
 			while(1) {
 				void *wtfsBuff;
-				ubiq::GenericError res = stream.write(wtfsBuff, size);
+				pet::GenericError res = stream.write(wtfsBuff, size);
 
 				if(res.failed())
 					return;

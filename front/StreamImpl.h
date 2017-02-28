@@ -27,18 +27,18 @@
 #include <errno.h>
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 inline WtfsEcosystem<Config>::WtfsMain::openStream(Node& node, Stream& stream)
 {
 	if(!node.hasData())
-		return ubiq::GenericError::isDirectoryError();
+		return pet::GenericError::isDirectoryError();
 
 	nodeListLock.lock();
 	Node* openedNode = openNodes.findByFields(node.key.id, &Node::key, &FullKey::id);
 
 	if(openedNode && (openedNode != &node)) {
 		nodeListLock.unlock();
-		return ubiq::GenericError::alreadyInUseError();
+		return pet::GenericError::alreadyInUseError();
 	}
 
 	node.referenceCount++;
@@ -56,9 +56,9 @@ inline WtfsEcosystem<Config>::WtfsMain::openStream(Node& node, Stream& stream)
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 inline WtfsEcosystem<Config>::WtfsMain::flushStream(Stream& stream) {
-	ubiq::GenericError ret = stream.flush();
+	pet::GenericError ret = stream.flush();
 
 	if(ret.failed())
 		return ret.rethrow();
@@ -67,7 +67,7 @@ inline WtfsEcosystem<Config>::WtfsMain::flushStream(Stream& stream) {
 		return 0;
 
 	if(isReadonly)
-		return ubiq::GenericError::readOnlyFsError();
+		return pet::GenericError::readOnlyFsError();
 
 	stream.node->dirty = false;
 
@@ -75,10 +75,10 @@ inline WtfsEcosystem<Config>::WtfsMain::flushStream(Stream& stream) {
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 inline WtfsEcosystem<Config>::WtfsMain::closeStream(Stream& stream)
 {
-	ubiq::GenericError ret = flushStream(stream);
+	pet::GenericError ret = flushStream(stream);
 
 	if(ret.failed())
 		return ret.rethrow();
@@ -111,31 +111,31 @@ inline void WtfsEcosystem<Config>::WtfsMain::Stream::initialize(Node* node) {
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::Stream::fetchPage()
 {
 	if(getPosition() > node->getSize())
-		return ubiq::GenericError::invalidSeekError();
+		return pet::GenericError::invalidSeekError();
 
-	ubiq::FailPointer<void> ret = node->read(page);
+	pet::FailPointer<void> ret = node->read(page);
 
 	if(ret.failed())
-		return ubiq::GenericError::readError();
+		return pet::GenericError::readError();
 
 	buffer = ret;
 	return 0;
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::Stream::flush()
 {
 	if(written) {
 		if(node->fs->isReadonly)
-			return ubiq::GenericError::readOnlyFsError();
+			return pet::GenericError::readOnlyFsError();
 
 		node->dirty = true;
-		ubiq::GenericError ret = node->update(page, getPosition(), buffer);
+		pet::GenericError ret = node->update(page, getPosition(), buffer);
 		buffer = 0;
 		written = false;
 		return ret;
@@ -148,11 +148,11 @@ WtfsEcosystem<Config>::WtfsMain::Stream::flush()
 }
 
 template<class Config>
-ubiq::GenericError
-WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size)
+pet::GenericError
+WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size, bool reading)
 {
 	if(offset == BlobStore::pageSize) {
-		ubiq::GenericError ret = flush();
+		pet::GenericError ret = flush();
 
 		if(ret.failed())
 			return ret.rethrow();
@@ -161,23 +161,33 @@ WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size)
 		offset = 0;
 	}
 
-	const uint32_t spaceLeft = BlobStore::pageSize - offset;
+	uint32_t spaceLeft = BlobStore::pageSize - offset;
+
+	if(reading) {
+		const uint32_t lastByteIdx = node->getSize() - 1;
+		const uint32_t lastPageIdx = lastByteIdx / BlobStore::pageSize;
+		if (lastPageIdx == page) {
+			const uint32_t lastDataByteIdxOnLastPage = lastByteIdx % BlobStore::pageSize;
+			spaceLeft = lastDataByteIdxOnLastPage + 1 - offset;
+		}
+	}
+
 	if(size > spaceLeft)
 		size = spaceLeft;
 
 	if(!buffer) {
 		if(getPosition() == node->getSize() && offset == 0) {
 			if(node->fs->isReadonly)
-				return ubiq::GenericError::readOnlyFsError();
+				return pet::GenericError::readOnlyFsError();
 
-			ubiq::FailPointer<void> ret = node->empty();
+			pet::FailPointer<void> ret = node->empty();
 
 			if(ret.failed())
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 
 			buffer = ret;
 		} else {
-			ubiq::GenericError ret = fetchPage();
+			pet::GenericError ret = fetchPage();
 
 			if(ret.failed())
 				return ret.rethrow();
@@ -190,7 +200,7 @@ WtfsEcosystem<Config>::WtfsMain::Stream::access(void* &content, uint32_t size)
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::Stream::read(void* &content, uint32_t size)
 {
 	if(size + getPosition() > node->getSize())
@@ -199,17 +209,17 @@ WtfsEcosystem<Config>::WtfsMain::Stream::read(void* &content, uint32_t size)
 	if(!size)
 		return 0;
 
-	return access(content, size);
+	return access(content, size, true);
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::Stream::write(void* &content, uint32_t size)
 {
 	if(!size)
 		return 0;
 
-	ubiq::GenericError ret = access(content, size);
+	pet::GenericError ret = access(content, size, false);
 
 	if(ret.failed())
 		return ret.rethrow();
@@ -220,7 +230,7 @@ WtfsEcosystem<Config>::WtfsMain::Stream::write(void* &content, uint32_t size)
 }
 
 template<class Config>
-ubiq::GenericError
+pet::GenericError
 WtfsEcosystem<Config>::WtfsMain::Stream::setPosition(Whence whence, int32_t offset)
 {
 	uint32_t newPosition;
@@ -230,33 +240,33 @@ WtfsEcosystem<Config>::WtfsMain::Stream::setPosition(Whence whence, int32_t offs
 	switch(whence) {
 	case Start:
 		if((offset < 0) || ((uint32_t)offset > size))
-			return ubiq::GenericError::invalidSeekError();
+			return pet::GenericError::invalidSeekError();
 
 		newPosition = offset;
 		break;
 	case Current:
 		if((offset < -(int32_t)getPosition()))
-			return ubiq::GenericError::invalidSeekError();
+			return pet::GenericError::invalidSeekError();
 
 		newPosition = getPosition() + offset;
 		break;
 	case End:
 		if(((uint32_t)-offset > size) || (offset > 0))
-			return ubiq::GenericError::invalidSeekError();
+			return pet::GenericError::invalidSeekError();
 
 		newPosition = size + offset;
 		break;
 	}
 
 	if(newPosition > size)
-		return ubiq::GenericError::invalidSeekError();
+		return pet::GenericError::invalidSeekError();
 
 	const uint32_t oldPage = page;
 	const uint32_t newPage = newPosition / BlobStore::pageSize;
 
 	if(buffer) {
 		if(written) {
-			ubiq::GenericError ret = flush();
+			pet::GenericError ret = flush();
 
 			if(ret.failed())
 				return ret.rethrow();

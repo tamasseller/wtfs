@@ -1,20 +1,21 @@
 /*******************************************************************************
- * Copyright (c) 2017 IBM Corporation and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
  *
- * Contributors:
- *     IBM Corporation - initial API and implementation
+ * Copyright (c) 2017 Tamás Seller. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
  *******************************************************************************/
-/*
- * MountImpl.h
- *
- *  Created on: 2016.12.10.
- *      Author: tooma
- */
-
 #ifndef MOUNTIMPL_H_
 #define MOUNTIMPL_H_
 
@@ -25,7 +26,7 @@ inline void WtfsEcosystem<Config>::WtfsMain::bind(Buffers* buffers) {
 }
 
 template<class Config>
-inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge)
+inline pet::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge)
 {
 	typedef typename FlashDriver::Address Address;
 	typedef typename Buffers::Buffer Buffer;
@@ -161,7 +162,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 				}
 		};
 
-		ubiq::GenericError travRet = this->traverse(session, Lambda(this));
+		pet::GenericError travRet = this->traverse(session, Lambda(this));
 
 		this->closeReadWriteSession(session);
 

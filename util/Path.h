@@ -27,21 +27,21 @@
 
 template<class Fs, class Allocator>
 class Path {
-	typedef mm::DynamicStack<typename Fs::NodeId, Allocator, 4> IdStack;
+	typedef pet::DynamicStack<typename Fs::NodeId, Allocator, 4> IdStack;
 	IdStack ids;
 
 public:
 	typedef typename IdStack::BottomUpIterator Reader;
 
 	inline Reader getReader() const;
-	inline ubiq::GenericError stepReader(Reader &reader, Fs&, typename Fs::Node&);
-	inline ubiq::GenericError load(Fs&, typename Fs::Node&);
-	ubiq::GenericError append(Fs&, typename Fs::Node&, const char* start, const char* end = 0);
+	inline pet::GenericError stepReader(Reader &reader, Fs&, typename Fs::Node&);
+	inline pet::GenericError load(Fs&, typename Fs::Node&);
+	pet::GenericError append(Fs&, typename Fs::Node&, const char* start, const char* end = 0);
 
 	inline void clear();
 	inline void dropLast();
 
-	ubiq::GenericError copy(const Path& other);
+	pet::GenericError copy(const Path& other);
 };
 
 template<class Fs, class Allocator>
@@ -51,11 +51,11 @@ Path<Fs, Allocator>::getReader() const {
 }
 
 template<class Fs, class Allocator>
-inline ubiq::GenericError
+inline pet::GenericError
 Path<Fs, Allocator>::stepReader(Reader& reader, Fs &fs, typename Fs::Node& node)
 {
 	if(reader.current()) {
-		ubiq::GenericError ret = fs.fetchChildById(node, *(reader.current()));
+		pet::GenericError ret = fs.fetchChildById(node, *(reader.current()));
 
 		if(ret.failed())
 			return ret.rethrow();
@@ -68,17 +68,17 @@ Path<Fs, Allocator>::stepReader(Reader& reader, Fs &fs, typename Fs::Node& node)
 }
 
 template<class Fs, class Allocator>
-inline ubiq::GenericError
+inline pet::GenericError
 Path<Fs, Allocator>::load(Fs &fs, typename Fs::Node& node) {
 	Reader reader(getReader());
 
-	ubiq::GenericError res = fs.fetchRoot(node);
+	pet::GenericError res = fs.fetchRoot(node);
 
 	if(res.failed())
 		return res.rethrow();
 
 	while(1) {
-		ubiq::GenericError res = stepReader(reader, fs, node);
+		pet::GenericError res = stepReader(reader, fs, node);
 
 		if(res.failed())
 			return res.rethrow();
@@ -91,9 +91,9 @@ Path<Fs, Allocator>::load(Fs &fs, typename Fs::Node& node) {
 }
 
 template<class Fs, class Allocator>
-ubiq::GenericError Path<Fs, Allocator>::append(Fs &fs, typename Fs::Node &node, const char* start, const char* strEnd)
+pet::GenericError Path<Fs, Allocator>::append(Fs &fs, typename Fs::Node &node, const char* start, const char* strEnd)
 {
-	ubiq::GenericError loadRes = load(fs, node);
+	pet::GenericError loadRes = load(fs, node);
 
 	if(loadRes.failed())
 		return loadRes.rethrow();
@@ -108,26 +108,26 @@ ubiq::GenericError Path<Fs, Allocator>::append(Fs &fs, typename Fs::Node &node, 
 			if(end - start != 1) { 												// 'foo//bar' case omitted
 				if(((end - start) == 2) && (start[1] == '.')) { 				// 'foo/./bar' case check
 					if(!node.isDirectory())
-						return ubiq::GenericError::isNotDirectoryError();
+						return pet::GenericError::isNotDirectoryError();
 				} else {
 					if(((end-start) == 3) && (start[1] == '.' && start[2] == '.')) {	// 'foo/../bar' case
 						if(!node.isDirectory())
-							return ubiq::GenericError::isNotDirectoryError();
+							return pet::GenericError::isNotDirectoryError();
 
 						ids.release();
 
-						ubiq::GenericError loadRes = load(fs, node);
+						pet::GenericError loadRes = load(fs, node);
 
 						if(loadRes.failed())
 							return loadRes.rethrow();
 					} else {
-						ubiq::GenericError fetchChildRes = fs.fetchChildByName(node, start+1, end);
+						pet::GenericError fetchChildRes = fs.fetchChildByName(node, start+1, end);
 
 						if(fetchChildRes.failed())
 							return fetchChildRes.rethrow();
 
 						if(ids.acquire().failed())
-							return ubiq::GenericError::outOfMemoryError();
+							return pet::GenericError::outOfMemoryError();
 
 						*ids.current() = node.getId();
 					}
@@ -157,9 +157,9 @@ inline void Path<Fs, Allocator>::dropLast() {
 }
 
 template<class Fs, class Allocator>
-ubiq::GenericError Path<Fs, Allocator>::copy(const Path& other) {
+pet::GenericError Path<Fs, Allocator>::copy(const Path& other) {
 	if(ids.copyFrom(other.ids).failed())
-		return ubiq::GenericError::outOfMemoryError();
+		return pet::GenericError::outOfMemoryError();
 	return true;
 }
 

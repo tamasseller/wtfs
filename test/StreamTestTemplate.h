@@ -52,7 +52,7 @@ struct FsStreamTestTemplate {
 			if(!stream)
 				stream = &this->stream;
 
-			ubiq::GenericError ret = stream->writeCopy(data, length);
+			pet::GenericError ret = stream->writeCopy(data, length);
 			CHECK(!ret.failed());
 			CHECK_EQUAL(length, ret);
 		}
@@ -63,7 +63,7 @@ struct FsStreamTestTemplate {
 
 			char* buffer = new char[length];
 
-			ubiq::GenericError ret = stream->readCopy(buffer, length);
+			pet::GenericError ret = stream->readCopy(buffer, length);
 			CHECK(!ret.failed());
 			if(!ret.failed()) {
 				CHECK_EQUAL(length, ret);
@@ -87,14 +87,14 @@ struct FsStreamTestTemplate {
 		}
 
 		inline void readZero() {
-			ubiq::GenericError ret = test->stream.readCopy(0, 0);
+			pet::GenericError ret = test->stream.readCopy(0, 0);
 			CHECK(!ret.failed());
 			CHECK(ret == 0);
 		}
 
 		inline void readOne() {
 			char c;
-			ubiq::GenericError ret = test->stream.readCopy(&c, 1);
+			pet::GenericError ret = test->stream.readCopy(&c, 1);
 			CHECK(!ret.failed());
 			CHECK(ret == 0);
 		}
@@ -126,19 +126,19 @@ struct FsStreamTestTemplate {
 				data[i] = i;
 
 			static int temp = 0;
-			ubiq::GenericError ret1 = test->stream.writeCopy((const char*)&temp, (unsigned int)sizeof(temp));
+			pet::GenericError ret1 = test->stream.writeCopy((const char*)&temp, (unsigned int)sizeof(temp));
 			CHECK(!ret1.failed());
 			if(ret1.failed())
 				return;
 
 			while(1) {
-				ubiq::GenericError ret2 = test->stream.setPosition(Fs::Stream::Current, -(unsigned int)sizeof(temp));
+				pet::GenericError ret2 = test->stream.setPosition(Fs::Stream::Current, -(unsigned int)sizeof(temp));
 				CHECK(!ret2.failed());
 				if(ret2.failed()) {
 					return;
 				}
 
-				ubiq::GenericError ret3 = test->stream.readCopy((char*)&temp, (unsigned int)sizeof(temp));
+				pet::GenericError ret3 = test->stream.readCopy((char*)&temp, (unsigned int)sizeof(temp));
 				CHECK(!ret3.failed());
 				if(ret3.failed())
 					return;
@@ -148,7 +148,7 @@ struct FsStreamTestTemplate {
 					break;
 
 
-				ubiq::GenericError ret4 = test->stream.writeCopy((char*)&temp, (unsigned int)sizeof(temp));
+				pet::GenericError ret4 = test->stream.writeCopy((char*)&temp, (unsigned int)sizeof(temp));
 				CHECK(!ret4.failed());
 				if(ret4.failed())
 					return;

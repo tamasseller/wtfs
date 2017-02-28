@@ -24,7 +24,7 @@
 
 #include "ubiquitous/Trace.h"
 
-class MockFlashTrace: public ubiq::Trace<MockFlashTrace> {};
+class MockFlashTrace: public pet::Trace<MockFlashTrace> {};
 
 template<unsigned int bytesPerPage, unsigned int pagesPerBlock, unsigned int nBlocks>
 class MockFlashDriver {

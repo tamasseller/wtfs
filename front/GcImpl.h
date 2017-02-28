@@ -21,7 +21,7 @@
 #define GCIMPL_H_
 
 template<class Config>
-inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::collectGarbage()
+inline pet::GenericError WtfsEcosystem<Config>::WtfsMain::collectGarbage()
 {
 	typedef typename Manager::Iterator StorageIterator;
 	typedef typename FlashDriver::Address Address;
@@ -93,7 +93,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::collectGarbage()
 }
 
 template<class Config>
-inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::
+inline pet::GenericError WtfsEcosystem<Config>::WtfsMain::
 moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages)
 {
 	typedef typename BlobStore::Page Page;
@@ -105,12 +105,12 @@ moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages
 		Node* node = openNodes.findByFields(((Page*)buff)->meta.id, &Node::key, &FullKey::id);
 
 		if(!node) {
-			ubiq::GenericError rootRes = fetchRoot(tempNode);
+			pet::GenericError rootRes = fetchRoot(tempNode);
 			if(rootRes.failed()) {
 				return rootRes.rethrow();
 			}
 
-			ubiq::GenericError idRes = fetchById(tempNode, ((Page*)buff)->meta.parentId, ((Page*)buff)->meta.id);
+			pet::GenericError idRes = fetchById(tempNode, ((Page*)buff)->meta.parentId, ((Page*)buff)->meta.id);
 			if(idRes.failed()) {
 				return idRes.rethrow();
 			}
@@ -120,7 +120,7 @@ moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages
 
 		this->buffers->release(buff, Clean);
 
-		ubiq::GenericError travRes = node->relocate(movePage);
+		pet::GenericError travRes = node->relocate(movePage);
 
 		if(travRes.failed()) {
 			WtfsTrace::fail << "\terror moving blob page " << page + i << "\n";
@@ -128,7 +128,7 @@ moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages
 		} else if(travRes) {
 			usedPages--;
 
-		   ubiq::GenericError updateRes = this->update(node->key, *node);
+		   pet::GenericError updateRes = this->update(node->key, *node);
 
 		   if(updateRes.failed())
 				   return updateRes.rethrow();
@@ -141,7 +141,7 @@ moveAroundBlobPages(typename FlashDriver::Address const page, uint32_t usedPages
 }
 
 template<class Config>
-inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::
+inline pet::GenericError WtfsEcosystem<Config>::WtfsMain::
 moveAroundMetaPages(typename FlashDriver::Address const page, uint32_t usedPages)
 {
 	typedef typename FlashDriver::Address Address;
@@ -149,7 +149,7 @@ moveAroundMetaPages(typename FlashDriver::Address const page, uint32_t usedPages
 
 	for(uint32_t i = 0; usedPages && i < FlashDriver::blockSize; i++) {
 		Address movePage = page + i;
-		ubiq::GenericError travRes = MetaTree::relocate(movePage);
+		pet::GenericError travRes = MetaTree::relocate(movePage);
 
 		if(travRes.failed()) {
 			WtfsTrace::fail << "\terror moving meta page " << page + i << "\n";

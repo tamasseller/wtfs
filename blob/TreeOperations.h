@@ -30,7 +30,7 @@ inline uint32_t BlobTree<Storage, Allocator, predLevelCount>::getSize() {
 }
 
 template<class Storage, class Allocator, uint32_t predLevelCount>
-inline ubiq::FailPointer<void> BlobTree<Storage, Allocator, predLevelCount>::empty() {
+inline pet::FailPointer<void> BlobTree<Storage, Allocator, predLevelCount>::empty() {
 	RWSession session(this);
 	this->upgrade(session);
 
@@ -52,7 +52,7 @@ inline void BlobTree<Storage, Allocator, predLevelCount>::release(void* buffer) 
 }
 
 template<class Storage, class Allocator, uint32_t predLevelCount>
-ubiq::FailPointer<void> BlobTree<Storage, Allocator, predLevelCount>::read(uint32_t page)
+pet::FailPointer<void> BlobTree<Storage, Allocator, predLevelCount>::read(uint32_t page)
 {
 	if((page * Storage::pageSize > size) || (root == Storage::InvalidAddress))
 		return 0;
@@ -86,7 +86,7 @@ ubiq::FailPointer<void> BlobTree<Storage, Allocator, predLevelCount>::read(uint3
 //       magic mechanism simpler, and that's nice because that is quite complicated by nature.
 
 template<class Storage, class Allocator, uint32_t predLevelCount>
-ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t page, uint32_t newSize, void* buffer)
+pet::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t page, uint32_t newSize, void* buffer)
 {
 	Address writtenAddress;
 	RWSession session(this);
@@ -97,7 +97,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 	if(!size) {
 		if(page != 0) {
 			this->Storage::release(session, buffer);
-			return ubiq::GenericError::invalidSeekError();
+			return pet::GenericError::invalidSeekError();
 		}
 
 		this->upgrade(session);
@@ -105,14 +105,14 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 		if(writtenAddress == Storage::InvalidAddress) {
 			this->rollback(session);
-			return ubiq::GenericError::writeError();
+			return pet::GenericError::writeError();
 		}
 	} else {
 		const uint32_t oldLastPage = (size - 1) / Storage::pageSize;
 
 		if(page > oldLastPage + 1) {
 			this->Storage::release(session, buffer);
-			return ubiq::GenericError::invalidSeekError();
+			return pet::GenericError::invalidSeekError();
 		}
 
 		const int32_t oldLevels = BlackMagic::getHighestLevel(oldLastPage);
@@ -125,14 +125,14 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 			writtenAddress = this->write(session, buffer);
 
 			if(writtenAddress == Storage::InvalidAddress)
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 
 			for(int32_t l = 0; l < newLevels; l++) {
 				void *ret = this->Storage::empty(session, l + 1);
 
 				if(!ret) {
 					this->rollback(session);
-					return ubiq::GenericError::writeError();
+					return pet::GenericError::writeError();
 				}
 
 				Address *table = (Address *) ret;
@@ -142,7 +142,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 				if(writtenAddress == Storage::InvalidAddress) {
 					this->rollback(session);
-					return ubiq::GenericError::writeError();
+					return pet::GenericError::writeError();
 				}
 			}
 
@@ -150,7 +150,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 			if(!ret) {
 				this->rollback(session);
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 			}
 
 			Address *table = (Address *) ret;
@@ -160,12 +160,12 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 			if(writtenAddress == Storage::InvalidAddress) {
 				this->rollback(session);
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 			}
 		} else {
 			int32_t level = oldLevels; // see note on top
 
-			mm::DynamicStack<Address, Allocator, predLevelCount> addresses;
+			pet::DynamicStack<Address, Allocator, predLevelCount> addresses;
 
 			Address address = root;
 
@@ -178,7 +178,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 				if(addresses.acquire().failed()) {
 					this->Storage::release(session, buffer);
 					this->rollback(session);
-					return ubiq::GenericError::outOfMemoryError();
+					return pet::GenericError::outOfMemoryError();
 				}
 
 				*addresses.current() = address;
@@ -190,7 +190,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 						if(addresses.acquire().failed()) {
 							this->Storage::release(session, buffer);
 							this->rollback(session);
-							return ubiq::GenericError::outOfMemoryError();
+							return pet::GenericError::outOfMemoryError();
 						}
 
 						*addresses.current() = Storage::InvalidAddress;
@@ -205,7 +205,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 					if(!ret) {
 						this->Storage::release(session, buffer);
 						this->rollback(session);
-						return ubiq::GenericError::readError();
+						return pet::GenericError::readError();
 					}
 
 					Address *table = (Address *)ret;
@@ -221,7 +221,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 				if(addresses.acquire().failed()) {
 					this->Storage::release(session, buffer);
 					this->rollback(session);
-					return ubiq::GenericError::outOfMemoryError();
+					return pet::GenericError::outOfMemoryError();
 				}
 
 				*addresses.current() = address;
@@ -248,7 +248,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 			if(writtenAddress == Storage::InvalidAddress) {
 				this->rollback(session);
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 			}
 
 			for(int32_t l=0; addresses.current(); l++) {
@@ -258,13 +258,13 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 					ret = (Address *)this->Storage::read(session, *addresses.current());
 					if(!ret) {
 						this->rollback(session);
-						return ubiq::GenericError::readError();
+						return pet::GenericError::readError();
 					}
 				} else {
 					ret = (Address *)this->Storage::empty(session, l+1);
 					if(!ret) {
 						this->rollback(session);
-						return ubiq::GenericError::writeError();
+						return pet::GenericError::writeError();
 					}
 				}
 
@@ -276,7 +276,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 				if(writtenAddress == Storage::InvalidAddress) {
 					this->rollback(session);
-					return ubiq::GenericError::writeError();
+					return pet::GenericError::writeError();
 				}
 			}
 
@@ -291,7 +291,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::update(uint32_t
 
 template<class Storage, class Allocator, uint32_t predLevelCount>
 template<class ElementCallback>
-ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSession &session, ElementCallback &&callback)
+pet::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSession &session, ElementCallback &&callback)
 {
 	if(!size)
 		return 1;
@@ -310,7 +310,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 	} else {
 
 		if(levelStates.acquire().failed())
-			return ubiq::GenericError::outOfMemoryError();
+			return pet::GenericError::outOfMemoryError();
 
 		levelStates.current()->idx = 0;
 		levelStates.current()->maxIdx = BlackMagic::getLevelOffset(lastPage, indexLevel);
@@ -322,7 +322,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 				void *ret = this->Storage::read(session, levelStates.current()->address);
 
 				if(!ret)
-					return ubiq::GenericError::readError();
+					return pet::GenericError::readError();
 
 				Address *table = (Address *)ret;
 
@@ -355,7 +355,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 				void *ret = this->Storage::read(session, levelStates.current()->address);
 
 				if(!ret)
-					return ubiq::GenericError::readError();
+					return pet::GenericError::readError();
 
 				Address *table = (Address *)ret;
 
@@ -366,7 +366,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 					State *parent = levelStates.current();
 
 					if(levelStates.acquire().failed())
-						return ubiq::GenericError::outOfMemoryError();
+						return pet::GenericError::outOfMemoryError();
 
 					indexLevel--;
 
@@ -403,7 +403,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 			void *rret = this->Storage::read(session, levelStates.current()->address);
 
 			if(!rret)
-				return ubiq::GenericError::readError();
+				return pet::GenericError::readError();
 
 			Address *table = (Address *)rret;
 
@@ -412,7 +412,7 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 			auto wret = this->Storage::write(session, table);
 
 			if(wret == Storage::InvalidAddress)
-				return ubiq::GenericError::writeError();
+				return pet::GenericError::writeError();
 
 			newAddress = wret;
 			levelStates.release();
@@ -426,12 +426,12 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::traverse(RWSess
 }
 
 template <class Storage, class Allocator, uint32_t predLevelCount>
-ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::dispose()
+pet::GenericError BlobTree<Storage, Allocator, predLevelCount>::dispose()
 {
 	RWSession session(this);
 	this->upgrade(session);
 
-	ubiq::GenericError ret = traverse(session, [&](typename Storage::Address addr, uint32_t level, const Traversor&) -> typename Storage::Address {
+	pet::GenericError ret = traverse(session, [&](typename Storage::Address addr, uint32_t level, const Traversor&) -> typename Storage::Address {
 		this->disposeAddress(session, addr);
 		return addr;
 	});
@@ -450,12 +450,12 @@ ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::dispose()
 }
 
 template<class Storage, class Allocator, uint32_t predLevelCount>
-inline ubiq::GenericError BlobTree<Storage, Allocator, predLevelCount>::relocate(Address &page)
+inline pet::GenericError BlobTree<Storage, Allocator, predLevelCount>::relocate(Address &page)
 {
 	RWSession session(this);
 	this->upgrade(session);
 
-	ubiq::GenericError res = this->traverse(session, [&](Address addr, uint32_t level, const Traversor&) -> Address {
+	pet::GenericError res = this->traverse(session, [&](Address addr, uint32_t level, const Traversor&) -> Address {
 		if(addr == page) {
 			void* ret = this->Storage::read(session, addr);
 

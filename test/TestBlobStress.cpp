@@ -41,8 +41,8 @@ struct TestData {
 	inline TestData(): tree(Storage::InvalidAddress, 0) {}
 
 	inline void populate() {
-		for(unsigned int i = 0; i < nPages; i++) {
-			ubiq::FailPointer<void> ret = tree.empty();
+		for(int i = 0; i < nPages; i++) {
+			pet::FailPointer<void> ret = tree.empty();
 			CHECK(!ret.failed());
 
 			if(ret.failed())
@@ -53,14 +53,14 @@ struct TestData {
 			for(unsigned int j=0; j<Storage::pageSize; j++)
 				buffer[j] = j;
 
-			ubiq::GenericError result = tree.update(i, Storage::pageSize*(i+1), buffer);
+			pet::GenericError result = tree.update(i, Storage::pageSize*(i+1), buffer);
 			CHECK(!result.failed());
 		}
 	}
 
 	inline void modify(unsigned int idx) {
 		//std::cout << std::endl << "???? " << idx << std::endl << std::endl;
-		ubiq::FailPointer<void> ret = tree.read(idx);
+		pet::FailPointer<void> ret = tree.read(idx);
 		CHECK(!ret.failed());
 
 		if(ret.failed())
@@ -73,7 +73,7 @@ struct TestData {
 
 		//std::cout << std::endl << "!!!! " << idx << " " << (void*)buffer << std::endl << std::endl;
 
-		ubiq::GenericError result = tree.update(idx, tree.getSize(), buffer);
+		pet::GenericError result = tree.update(idx, tree.getSize(), buffer);
 		CHECK(!result.failed());
 	}
 };

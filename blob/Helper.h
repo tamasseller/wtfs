@@ -32,13 +32,13 @@ struct LevelsHelper {
 	static constexpr uint32_t base = Storage::pageSize/sizeof(typename Storage::Address);
 
 	template<unsigned int n>
-	using logBase = typename meta::log<base>::template x<n>;
+	using logBase = typename pet::log<base>::template x<n>;
 
 	template<unsigned int n>
-	using expBase = typename meta::exp<base>::template x<n>;
+	using expBase = typename pet::exp<base>::template x<n>;
 
 	static constexpr auto nLevels = logBase<UINT_MAX-1>::value;
-	static constexpr auto &sizes = meta::applyOverRange<LevelsHelper<Storage>::expBase, 1, nLevels>::value;
+	static constexpr auto &sizes = pet::applyOverRange<LevelsHelper<Storage>::expBase, 1, nLevels>::value;
 
 	static inline uint32_t getHighestLevel(uint32_t pageIndex)
 	{

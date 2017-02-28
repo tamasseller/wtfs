@@ -37,8 +37,8 @@ struct KVTestKey {
 		if(strlen(name) < strlen(than.name))
 			return false;
 
-		unsigned int hash = algorithm::Fnv::hash(name);
-		unsigned int otherHash = algorithm::Fnv::hash(than.name);
+		unsigned int hash = pet::Fnv::hash(name);
+		unsigned int otherHash = pet::Fnv::hash(than.name);
 
 		if(hash > otherHash)
 			return true;
@@ -73,7 +73,7 @@ struct KVTestIndexKey {
 	unsigned int hash;
 	unsigned int length;
 
-	KVTestIndexKey(const KVTestKey &key): hash(algorithm::Fnv::hash(key.name)), length(strlen(key.name)){}
+	KVTestIndexKey(const KVTestKey &key): hash(pet::Fnv::hash(key.name)), length(strlen(key.name)){}
 
 	inline bool operator >(const KVTestIndexKey& than) const
 	{

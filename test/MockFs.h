@@ -66,19 +66,19 @@ private:
 	};
 
 	Directory root;
-	ubiq::GenericError checkNew(Node&, const char*, const char*);
+	pet::GenericError checkNew(Node&, const char*, const char*);
 public:
-	ubiq::GenericError fetchRoot(Node&);
-	ubiq::GenericError fetchChildByName(Node&, const char*, const char* end = 0);
-	ubiq::GenericError fetchChildById(Node&, NodeId);
-	ubiq::GenericError fetchFirstChild(Node&);
-	ubiq::GenericError fetchNextSibling(Node&);
-	ubiq::GenericError newDirectory(Node&, const char*, const char*);
-	ubiq::GenericError newFile(Node&, const char*, const char*);
-	ubiq::GenericError removeNode(Node&);
+	pet::GenericError fetchRoot(Node&);
+	pet::GenericError fetchChildByName(Node&, const char*, const char*);
+	pet::GenericError fetchChildById(Node&, NodeId);
+	pet::GenericError fetchFirstChild(Node&);
+	pet::GenericError fetchNextSibling(Node&);
+	pet::GenericError newDirectory(Node&, const char*, const char*);
+	pet::GenericError newFile(Node&, const char*, const char*);
+	pet::GenericError removeNode(Node&);
 
-	ubiq::GenericError openStream(Node&, Stream&);
-	ubiq::GenericError flushStream(Stream&);
+	pet::GenericError openStream(Node&, Stream&);
+	pet::GenericError flushStream(Stream&);
 
 	class Node: public NodeBase<Node> {
 		Entry* entry;
@@ -102,10 +102,10 @@ public:
 			Start, Current, End
 		};
 
-		ubiq::GenericError read(void* &content, unsigned int size);
-		ubiq::GenericError write(void* &content, unsigned int size);
-		ubiq::GenericError setPosition(Whence whence, int offset);
-		ubiq::GenericError flush();
+		pet::GenericError read(void* &content, unsigned int size);
+		pet::GenericError write(void* &content, unsigned int size);
+		pet::GenericError setPosition(Whence whence, int offset);
+		pet::GenericError flush();
 
 		unsigned int getPosition();
 		unsigned int getSize();

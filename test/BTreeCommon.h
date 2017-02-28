@@ -48,7 +48,7 @@ struct BTreeTestUtils {
 	};
 
 	template <class Storage, class Key, class IndexKey, class Value, class Allocator, class Callback>
-	static ubiq::GenericError traverse(BTree<Storage, Key, IndexKey, Value, Allocator> &tree, Callback&& callback) {
+	static pet::GenericError traverse(BTree<Storage, Key, IndexKey, Value, Allocator> &tree, Callback&& callback) {
 		typename Storage::ReadWriteSession session(&tree);
 		auto ret = tree.traverse<Callback>(session, callback);
 		tree.Storage::closeReadWriteSession(session);
@@ -56,7 +56,7 @@ struct BTreeTestUtils {
 	}
 
 	template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-	static ubiq::GenericError nthAddress(BTree<Storage, Key, IndexKey, Value, Allocator> &tree, unsigned int n, typename Storage::Address &retAddr) {
+	static pet::GenericError nthAddress(BTree<Storage, Key, IndexKey, Value, Allocator> &tree, unsigned int n, typename Storage::Address &retAddr) {
 		typename Storage::ReadWriteSession session(&tree);
 		auto ret = tree.traverse(session, [&](typename Storage::Address addr, unsigned int level, const typename BTree<Storage, Key, IndexKey, Value, Allocator>::Traversor & parents) {
 			if(!--n) {
@@ -131,7 +131,7 @@ struct BTreeTestUtils {
 			std::initializer_list<Key> reqContents)
 	{
 		typedef typename BTree<Storage, Key, IndexKey, Value, Allocator>::Element Element;
-		typedef ubiq::GenericError Result;
+		typedef pet::GenericError Result;
 		typedef DummyComparator<Element, Key> KeyComparator;
 		typedef DummyComparator<IndexKey, IndexKey> IndexComparator;
 
