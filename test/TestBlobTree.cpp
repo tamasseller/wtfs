@@ -60,7 +60,7 @@ struct TestData {
 
 	inline void addNPages(unsigned int n) {
 		DISABLE_FAILURE_INJECTION_TEMPORARILY();
-		for(int i = 0; i < n; i++) {
+		for(unsigned int i = 0; i < n; i++) {
 			pet::FailPointer<void> ret = tree.empty();
 			CHECK(!ret.failed());
 			unsigned char* buffer = ret;

@@ -142,7 +142,7 @@ public:
 		inline void bind(Buffers*);
 		pet::GenericError initialize(bool purge=false);
 		pet::GenericError fetchRoot(Node&);
-		pet::GenericError fetchChildByName(Node&, const char*, const char*);
+		pet::GenericError fetchChildByName(Node&, const char*, const char* = 0);
 		pet::GenericError fetchChildById(Node&, NodeId);
 		pet::GenericError fetchFirstChild(Node&);
 		pet::GenericError fetchNextSibling(Node&);

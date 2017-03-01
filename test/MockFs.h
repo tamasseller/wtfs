@@ -69,7 +69,7 @@ private:
 	pet::GenericError checkNew(Node&, const char*, const char*);
 public:
 	pet::GenericError fetchRoot(Node&);
-	pet::GenericError fetchChildByName(Node&, const char*, const char*);
+	pet::GenericError fetchChildByName(Node&, const char*, const char* = 0);
 	pet::GenericError fetchChildById(Node&, NodeId);
 	pet::GenericError fetchFirstChild(Node&);
 	pet::GenericError fetchNextSibling(Node&);

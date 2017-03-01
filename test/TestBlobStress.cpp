@@ -41,7 +41,7 @@ struct TestData {
 	inline TestData(): tree(Storage::InvalidAddress, 0) {}
 
 	inline void populate() {
-		for(int i = 0; i < nPages; i++) {
+		for(unsigned int i = 0; i < nPages; i++) {
 			pet::FailPointer<void> ret = tree.empty();
 			CHECK(!ret.failed());
 
