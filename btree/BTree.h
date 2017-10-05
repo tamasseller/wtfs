@@ -29,7 +29,7 @@
 
 #include "ubiquitous/Trace.h"
 
-class BtreeTrace: public ubiq::Trace<BtreeTrace> {};
+class BtreeTrace: public pet::Trace<BtreeTrace> {};
 
 #ifndef BTREE_LOCATOR_LEVELS
 #define BTREE_LOCATOR_LEVELS 4
@@ -52,7 +52,7 @@ public:
 		inline bool operator ==(const Key& to) const;
 	};
 
-	typedef algorithm::Bisect::DefaultComparator<IndexKey, IndexKey> FullComparator;
+	typedef pet::Bisect::DefaultComparator<IndexKey, IndexKey> FullComparator;
 
 protected:
     //
@@ -66,7 +66,7 @@ protected:
 	constexpr static const Address InvalidAddress = Storage::InvalidAddress;
 	constexpr static const Key &InvalidKey = Key::InvalidKey;
 
-	typedef ubiq::FailValue<Address, InvalidAddress> FailAddress;
+	typedef pet::FailValue<Address, InvalidAddress> FailAddress;
 
 	//
 	// Internal types
@@ -111,7 +111,7 @@ protected:
 		}
 	};
 
-	typedef mm::DynamicStack<LevelLocation, Allocator, BTREE_LOCATOR_LEVELS> Locator;
+	typedef pet::DynamicStack<LevelLocation, Allocator, BTREE_LOCATOR_LEVELS> Locator;
 
 	class Iterator {
 		friend BTree;
@@ -153,31 +153,31 @@ protected:
 	//
 
 	template<class Comparator = FullComparator>
-	inline ubiq::GenericError stepDown(ROSession &session, Iterator& iterator, Address address, uint32_t level);
+	inline pet::GenericError stepDown(ROSession &session, Iterator& iterator, Address address, uint32_t level);
 
 	template<class Comparator = FullComparator>
-	inline ubiq::GenericError step(ROSession &session, Iterator& iterator);
+	inline pet::GenericError step(ROSession &session, Iterator& iterator);
 
 	template<class Comparator = FullComparator>
-	inline ubiq::GenericError iterate(ROSession &session, Iterator& iterator);
+	inline pet::GenericError iterate(ROSession &session, Iterator& iterator);
 
 	template <class IndexComparator, class KeyComparator, class MatchHandler>
-	inline ubiq::GenericError checkTable(ROSession &session, const typename Storage::Address& address, Key &key, Value &value, MatchHandler &matchHandler);
+	inline pet::GenericError checkTable(ROSession &session, const typename Storage::Address& address, Key &key, Value &value, MatchHandler &matchHandler);
 
 	//
 	// Mutation helpers
 	//
 
-	inline ubiq::FailPointer<Table> splitTable(RWSession& session, Table& table, uint32_t insIdx, const Key& key, Value value);
+	inline pet::FailPointer<Table> splitTable(RWSession& session, Table& table, uint32_t insIdx, const Key& key, Value value);
 	inline FailAddress splitEntry(RWSession &session, Locator &pos, IndexKey hash, Address updatedAddress, Address newAddress);
 	enum class MergeDirection {Up, Down};
 	inline FailAddress mergeEntry(RWSession& session, Locator &pos, Address newAddress, MergeDirection direction, bool rootHasTwo);
 
 	template<class T>
-	inline ubiq::GenericError actionPlanner(ROSession &session, PlanOfAction<T> &plan, Locator&);
+	inline pet::GenericError actionPlanner(ROSession &session, PlanOfAction<T> &plan, Locator&);
 
 	template<bool updateAllowed, bool insertAllowed>
-	inline ubiq::GenericError write(const Key &key, const Value &value);
+	inline pet::GenericError write(const Key &key, const Value &value);
 
 	//
 	// Internal data
@@ -186,10 +186,10 @@ protected:
 	uint32_t levels = 0;
 	Address root = InvalidAddress;
 
-	typedef mm::DynamicStack<Address, Allocator, BTREE_TRAVERSOR_LEVELS> Traversor;
+	typedef pet::DynamicStack<Address, Allocator, BTREE_TRAVERSOR_LEVELS> Traversor;
 
 	template<class ElementCallback>
-	ubiq::GenericError traverse(RWSession &session, ElementCallback&& callback);
+	pet::GenericError traverse(RWSession &session, ElementCallback&& callback);
 
 public:
 	inline BTree() = default;
@@ -207,20 +207,20 @@ public:
 	};
 
 	template <class IndexComparator, class KeyComparator, class MatchHandler>
-	ubiq::GenericError search(Key &key, Value &value, MatchHandler &matchHandler);
+	pet::GenericError search(Key &key, Value &value, MatchHandler &matchHandler);
 
 	template <class IndexComparator, class KeyComparator, class MatchHandler=DefaultMatchHandler>
-	ubiq::GenericError search(Key &key, Value &value);
+	pet::GenericError search(Key &key, Value &value);
 
-	inline ubiq::GenericError get(Key &key, Value &value = *(Value*)0);
+	inline pet::GenericError get(Key &key, Value &value = *(Value*)0);
 
-	ubiq::GenericError put(const Key &key, const Value &value);
-	ubiq::GenericError insert(const Key &key, const Value &value);
-	ubiq::GenericError update(const Key &key, const Value &value);
+	pet::GenericError put(const Key &key, const Value &value);
+	pet::GenericError insert(const Key &key, const Value &value);
+	pet::GenericError update(const Key &key, const Value &value);
 
-	ubiq::GenericError remove(const Key &key, Value *value = 0);
-	inline ubiq::GenericError purge();
-	inline ubiq::GenericError relocate(Address&);
+	pet::GenericError remove(const Key &key, Value *value = 0);
+	inline pet::GenericError purge();
+	inline pet::GenericError relocate(Address&);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////

@@ -4,6 +4,6 @@
 [submodule "test/pet"]
 	path = test/pet
 	url = http://github.com/tamasseller/pet
-[submodule "test/failure-injector"]
-	path = test/failure-injector
-	url = http://github.com/tamasseller/failure-injector
+[submodule "test/toolchains"]
+	path = test/toolchains
+	url = http://github.com/tamasseller/toolchains

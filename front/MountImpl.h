@@ -26,7 +26,7 @@ inline void WtfsEcosystem<Config>::WtfsMain::bind(Buffers* buffers) {
 }
 
 template<class Config>
-inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge)
+inline pet::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge)
 {
 	typedef typename FlashDriver::Address Address;
 	typedef typename Buffers::Buffer Buffer;
@@ -162,7 +162,7 @@ inline ubiq::GenericError WtfsEcosystem<Config>::WtfsMain::initialize(bool purge
 				}
 		};
 
-		ubiq::GenericError travRet = this->traverse(session, Lambda(this));
+		pet::GenericError travRet = this->traverse(session, Lambda(this));
 
 		this->closeReadWriteSession(session);
 

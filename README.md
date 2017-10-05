@@ -20,20 +20,6 @@ performance by leveraging agressive inlining.
 And also to introduce internal decoupling, through templatization to make the whole software module
 thoroughly testable layer by layer.
 
-![System block diagram](https://g.gravizo.com/g?
-  digraph G {
-    wtfs[shape=record label="<l>wtfs\\nlogic|<b>buffers|<m>manager"];
-    app[label = "Application"];
-    drv[label = "Driver"];
-    edge[penwidth=3]
-    app -> wtfs:b [label = "Direct\\naccess"];
-    wtfs:b -> drv[label = "DMA"];
-    edge[penwidth="" style=dashed]
-    app -> wtfs:l [label = "Meta\\nops"];
-    wtfs:m -> drv[label = "Commands"];
-  }
-)
-
 How to use it
 -------------
 

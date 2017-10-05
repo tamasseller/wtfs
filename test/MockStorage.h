@@ -20,12 +20,10 @@
 #ifndef MOCKSTORAGE_H_
 #define MOCKSTORAGE_H_
 
-#include "CppUTest/TestHarness.h"
-#include "FailureSource.h"
-#include "ubiquitous/Trace.h"
+#include "1test/Test.h"
+#include "1test/FailureInjector.h"
 
-// CppUTest magic trickery avoidance.
-#undef new
+#include "ubiquitous/Trace.h"
 
 #include <cstring>
 #include <unordered_set>
@@ -33,18 +31,6 @@
 #include <cstdint>
 
 class MockStorageTrace;
-
-struct StorageFailureSource: public StaticFailureSource<StorageFailureSource> {
-	static bool shouldFail() {
-		return instance.shouldSimulateError();
-	}
-
-	virtual const char* getFailureSourceName() {
-		return "Storage";
-	}
-
-	inline virtual ~StorageFailureSource() {}
-};
 
 /*
  * The storage abstraction operates with the following concepts:
@@ -88,7 +74,7 @@ struct StorageFailureSource: public StaticFailureSource<StorageFailureSource> {
  * expected to be committed.
  */
 template<unsigned int pageSizeParam, class Client, bool strict=true, bool checkRoot = true>
-struct MockStorage: protected ubiq::Trace<MockStorageTrace> {
+struct MockStorage: protected pet::Trace<MockStorageTrace> {
 	////////////////////////////////////////////////////////////////
 	// These are the required definitions mentioned above
 	////////////////////////////////////////////////////////////////
@@ -240,7 +226,7 @@ inline MockStorage<pageSizeParam, Client, strict, checkRoot>::ReadOnlySession::~
 		}
 
 		info << "\n";
-		FAIL_ALWAYS("Leaked buffers")
+		FAIL_ALWAYS("Leaked buffers");
 	}
 }
 
@@ -248,7 +234,7 @@ template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 void *MockStorage<pageSizeParam, Client, strict, checkRoot>::read(ReadOnlySession& session, Address p)
 {
 	CHECK(!session.closed);
-	if(StorageFailureSource::shouldFail()) {
+	if(pet::FailureInjector::shouldSimulateError()) {
 		info << "\nFAIL read: " << p << "\n\n";
 		session.error = true;
 		return 0;
@@ -272,7 +258,7 @@ void MockStorage<pageSizeParam, Client, strict, checkRoot>::release(ReadOnlySess
 
 	if(strict) {
 		CHECK(old);
-		CHECK_TEXT(memcmp(old, current, sizeof(PageData)) == 0, "Released modified data without write");
+		CHECK("Released modified data without write", memcmp(old, current, sizeof(PageData)) == 0);
 	}
 
 	auto ret = session.active.erase((PageBuffer*)current);
@@ -316,7 +302,7 @@ MockStorage<pageSizeParam, Client, strict, checkRoot>::write(ReadWriteSession& s
 	if(old) {
 		if(strict) {
 			bool ok = allowUnnecessary || memcmp(old, current, sizeof(PageData)) != 0;
-			CHECK_TEXT(ok, "Unnecessary write");
+			CHECK(ok);
 		}
 
 		CHECK(session.garbage.insert((PageBuffer*)old).second);
@@ -328,7 +314,7 @@ MockStorage<pageSizeParam, Client, strict, checkRoot>::write(ReadWriteSession& s
 		CHECK(ret == 1);
 	}
 
-	if(StorageFailureSource::shouldFail()) {
+	if(pet::FailureInjector::shouldSimulateError()) {
 		info << "\nFAIL write: " << p << "\n\n";
 		session.error = true;
 		return 0;
@@ -369,7 +355,7 @@ void *MockStorage<pageSizeParam, Client, strict, checkRoot>::empty(ReadWriteSess
 		session.levelEmptyCounters.insert(std::pair<int, int>(level, 1));
 
 	CHECK(session.upgraded);
-	if(StorageFailureSource::shouldFail()) {
+	if(pet::FailureInjector::shouldSimulateError()) {
 		info << "\nFAIL empty\n\n";
 		session.error = true;
 		return 0;
@@ -391,8 +377,8 @@ void MockStorage<pageSizeParam, Client, strict, checkRoot>::disposeBuffered(Read
 	const PageData* old = ((PageBuffer*)(PageData*)(void*)p)->old;
 	PageData* current = ((PageData*)(void*)p);
 
-	CHECK_TEXT(old != NULL, "Newly allocated page disposed");
-	CHECK_TEXT(memcmp(old, current, sizeof(PageData)) == 0, "Disposed of modified data");
+	CHECK("Newly allocated page disposed", old != NULL);
+	CHECK(memcmp(old, current, sizeof(PageData)) == 0, "Disposed of modified data");
 
 	CHECK(session.active.erase((PageBuffer*)current) == 1);
 	CHECK(session.garbage.insert((PageBuffer*)old).second);
@@ -544,7 +530,7 @@ inline bool MockStorage<pageSizeParam, Client, strict, checkRoot>::isClean() {
 template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::traceEmpty(void* ret)
 {
-	CHECK_TEXT(diagnostics.open.insert((void*)ret).second, "Duplicate empty");
+	CHECK("Duplicate empty", diagnostics.open.insert((void*)ret).second);
 
 	diagnostics.opened++;
 	diagnostics.inuse++;
@@ -559,7 +545,7 @@ template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::tracePreWrite(void* in)
 {
 	info << "write " << in;
-	CHECK_TEXT(diagnostics.open.erase((void*)in) == 1, "Unopened buffer written");
+	CHECK("Unopened buffer written", diagnostics.open.erase((void*)in) == 1);
 }
 
 template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
@@ -575,14 +561,14 @@ template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::tracePreRead(Address in)
 {
 	bool ok = diagnostics.stored.find(in) != diagnostics.stored.end();
-	CHECK_TEXT(ok, "Invalid read");
+	CHECK(ok);
 	info << "read " << in << " -> ";
 }
 
 template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::tracePostRead(void* ret)
 {
-	CHECK_TEXT(diagnostics.open.insert((void*)ret).second, "Duplicate read");
+	CHECK("Duplicate read", diagnostics.open.insert((void*)ret).second);
 	diagnostics.nRead++;
 	diagnostics.opened++;
 	info << ret << "\n";
@@ -591,7 +577,7 @@ inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::
 template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::traceRelease(void* in)
 {
-	CHECK_TEXT(diagnostics.open.erase((void*)in) == 1, "Unopened buffer released");
+	CHECK("Unopened buffer released", diagnostics.open.erase((void*)in) == 1);
 	diagnostics.closed++;
 	info << "release " << in << "\n";
 }
@@ -599,7 +585,7 @@ inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::
 template<unsigned int pageSizeParam, class Client, bool strict, bool checkRoot>
 inline void MockStorage<pageSizeParam, Client, strict, checkRoot>::Diagnostics::traceDispose(const void* in)
 {
-	CHECK_TEXT(diagnostics.stored.erase((Address)in) == 1, "Not stored buffer disposed");
+	CHECK("Not stored buffer disposed", diagnostics.stored.erase((Address)in) == 1);
 	info << "dispose " << in << "\n";
 	diagnostics.inuse--;
 }

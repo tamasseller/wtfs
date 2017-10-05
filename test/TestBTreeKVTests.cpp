@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "BTreeParametrizedForTesting.h"
 #include "KVTestKey.h"
@@ -113,7 +113,7 @@ static void simpleSearch(TestTree &tree)
 		KVTestKey key(keys[i]);
 		const char* value = NULL;
 
-		ubiq::GenericError ret = tree.get(key, value);
+		pet::GenericError ret = tree.get(key, value);
 		CHECK(!ret.failed());
 		CHECK(ret);
 
@@ -176,7 +176,7 @@ static void countLonger(TestTree &tree)
 		KVTestKey key(temp);
 
 		CountingMatchHandler countingMatchHandler(count);
-		ubiq::GenericError ret = tree.search<LongerIndexComparator, LongerElementComparator>(key, *(const char**)0, countingMatchHandler);
+		pet::GenericError ret = tree.search<LongerIndexComparator, LongerElementComparator>(key, *(const char**)0, countingMatchHandler);
 		CHECK(!ret.failed());
 		CHECK(!ret);
 
@@ -224,7 +224,7 @@ static void countShorterOrEqual(TestTree &tree)
 		KVTestKey key(temp);
 
 		CountingMatchHandler countingMatchHandler(count);
-		ubiq::GenericError ret = tree.search<ShorterOrEqualIndexComparator, ShorterOrEqualElementComparator>(key, *(const char**)0, countingMatchHandler);
+		pet::GenericError ret = tree.search<ShorterOrEqualIndexComparator, ShorterOrEqualElementComparator>(key, *(const char**)0, countingMatchHandler);
 		CHECK(!ret.failed());
 		CHECK(!ret);
 
@@ -238,31 +238,30 @@ TEST_GROUP(BTreeKV) {
 	static constexpr unsigned int coPrimeToNKeys2 = 19;
 
 	TEST_SETUP() {
-		INHIBIT_FAILURE_INJECTION_FOR_STATIC_SOURCE(FailableAllocator);
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 
 		int i = 0;
 		do {
 			i = (i + coPrimeToNKeys1) % nKeys;
-			ubiq::GenericError ret = tree.put(keys[i], values[i]);
+			pet::GenericError ret = tree.put(keys[i], values[i]);
 			CHECK(!ret.failed());
 			CHECK(ret);
 		}while(i);
 
-		ENABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::enable();
 	}
 
 	TEST_TEARDOWN() {
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 
 		int i = 0;
 		do {
 			i = (i + coPrimeToNKeys2) % nKeys;
-			ubiq::GenericError ret = tree.remove(keys[i]);
+			pet::GenericError ret = tree.remove(keys[i]);
 			CHECK(!ret.failed());
 			CHECK(ret);
 		}while(i);
-		ENABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::enable();
 
 		BTreeTestUtils::finalCheckAndCleanup(tree);
 	}

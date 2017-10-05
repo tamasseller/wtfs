@@ -20,19 +20,21 @@
 #ifndef DEBUGCONFIG_H_
 #define DEBUGCONFIG_H_
 
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
-#include "Addr2lineBacktrace.h"
+#include "1test/Test.h"
+#include "1test/Mock.h"
+
 #include "ubiquitous/PrintfWriter.h"
 
+#include "ubiquitous/ConfigHelper.h"
+
 UNCHECKED_ERROR_REPORT() {
-		Addr2lineBacktrace().print();
 		FAIL("Unchecked Error");
 }
 
 TRACE_WRITER(PrintfWriter);
 GLOBAL_TRACE_POLICY(Failure);
 
+CLIENT_TRACE_POLICY(TestTraceTag, All);
 //CLIENT_TRACE_POLICY(MockStorageTrace, Information);
 //CLIENT_TRACE_POLICY(MockFlashTrace, Information);
 //CLIENT_TRACE_POLICY(StorageManagerTrace, Information);

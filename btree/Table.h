@@ -73,7 +73,7 @@ inline void BTree<Storage, Key, IndexKey, Value, Allocator>::Table::remove(uint3
 }
 
 template <class Storage, class Key, class IndexKey, class Value, class Allocator>
-inline ubiq::FailPointer<typename BTree<Storage, Key, IndexKey, Value, Allocator>::Table>
+inline pet::FailPointer<typename BTree<Storage, Key, IndexKey, Value, Allocator>::Table>
 BTree<Storage, Key, IndexKey, Value, Allocator>::
 splitTable(RWSession& session, Table &table, uint32_t insIdx, const Key& key, Value address)
 {

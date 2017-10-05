@@ -17,8 +17,8 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
-#include "FailureInjectorPlugin.h"
+#include "1test/Test.h"
+#include "1test/FailureInjector.h"
 
 #include "BTreeParametrizedForTesting.h"
 #include "BTreeTextValue.h"
@@ -300,7 +300,6 @@ TEST_GROUP(BtreeDummyData) {
 	TestTree tree;
 
 	TEST_TEARDOWN() {
-		SET_FAILURE_INJECTION_MODE_SHARED();
 		BTreeTestUtils::finalCheckAndCleanup(tree);
 	}
 };
@@ -309,10 +308,9 @@ TEST_GROUP(BtreeMeaningfulData) {
 	TestTree tree;
 
 	TEST_SETUP() {
-		SET_FAILURE_INJECTION_MODE_SHARED();
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 		addNamed(tree);
-		ENABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::enable();
 	}
 
 	TEST_TEARDOWN() {
@@ -325,8 +323,7 @@ TEST_GROUP(BtreeNoiseAddedData) {
 	static constexpr unsigned int primes[] = {2, 3, 5, 7};//{3, 5, 7, 11};
 
 	TEST_SETUP() {
-		SET_FAILURE_INJECTION_MODE_SHARED();
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 		addNamed(tree);
 
 		TextValue value("bullShit");
@@ -338,7 +335,7 @@ TEST_GROUP(BtreeNoiseAddedData) {
 			for(int month = primes[1]; month ; month = (month + primes[1]) % primes[3])
 				for(int day = primes[2]; day; day = (day + primes[2]) % primes[3])
 					BTreeTestUtils::requireSucces(tree.insert(DateKey(1992 + year, 1 + month, 1 + day), value));
-		ENABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::enable();
 	}
 
 	TEST_TEARDOWN() {
@@ -347,7 +344,7 @@ TEST_GROUP(BtreeNoiseAddedData) {
 		 * Remove sequential data in pseudo random order (note the shuffled indices)
 		 */
 
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 		for(int year = primes[0]; year; year = (year + primes[0]) % primes[3])
 			for(int month = primes[1]; month ; month = (month + primes[1]) % primes[3])
 				for(int day = primes[2]; day; day = (day + primes[2]) % primes[3])

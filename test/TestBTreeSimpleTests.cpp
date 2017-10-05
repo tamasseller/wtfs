@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "BTreeParametrizedForTesting.h"
 
@@ -46,7 +46,6 @@ TEST_GROUP(SimpleEmptyTree) {
 TEST(SimpleEmptyTree, AddOne) {
 	BTreeTestUtils::requireSucces(tree.insert(1, 1));
 	BTreeTestUtils::requireKeys(tree, {Key(1)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {});
 }
 
 TEST(SimpleEmptyTree, DontAddOne) {
@@ -62,7 +61,6 @@ TEST(SimpleEmptyTree, UpdateOne) {
 TEST(SimpleEmptyTree, DontUpdateOne) {
 	BTreeTestUtils::requireFailure(tree.update(1, 2));
 	BTreeTestUtils::requireKeysAlways(tree, {});
-
 }
 
 TEST(SimpleEmptyTree, Search) {
@@ -96,25 +94,21 @@ TEST_GROUP(SimpleFirstLayerTree) {
 TEST(SimpleFirstLayerTree, AddFourth) {
 	BTreeTestUtils::requireSucces(tree.insert(9, 9));
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(8), Key(9)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8)});
 }
 
 TEST(SimpleFirstLayerTree, AddThird) {
 	BTreeTestUtils::requireSucces(tree.insert(6, 6));
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(6), Key(8)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8)});
 }
 
 TEST(SimpleFirstLayerTree, AddSecond) {
 	BTreeTestUtils::requireSucces(tree.insert(3, 3));
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(3), Key(5), Key(8)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8)});
 }
 
 TEST(SimpleFirstLayerTree, AddFirst) {
 	BTreeTestUtils::requireSucces(tree.insert(0u, 0));
 	BTreeTestUtils::requireKeys(tree, {Key(0), Key(2), Key(5), Key(8)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8)});
 }
 
 TEST(SimpleFirstLayerTree, DontRemove) {
@@ -145,7 +139,6 @@ TEST(SimpleFirstLayerTree, Traverse) {
 	BTreeTestUtils::requireKeysAlways(tree, {Key(2), Key(5), Key(8)});
 }
 
-
 TEST_GROUP(SimpleSplitTree) {
 	TestTree tree;
 
@@ -166,7 +159,6 @@ TEST(SimpleSplitTree, RemoveFourth) {
 	BTreeTestUtils::requireSucces(tree.remove(11, &value));
 	CHECK(value == 11);
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(8)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11)});
 }
 
 TEST(SimpleSplitTree, RemoveThird) {
@@ -174,7 +166,6 @@ TEST(SimpleSplitTree, RemoveThird) {
 	BTreeTestUtils::requireSucces(tree.remove(8, &value));
 	CHECK(value == 8);
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(11)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11)});
 }
 
 TEST(SimpleSplitTree, RemoveSecond) {
@@ -182,7 +173,6 @@ TEST(SimpleSplitTree, RemoveSecond) {
 	BTreeTestUtils::requireSucces(tree.remove(5, &value));
 	CHECK(value == 5);
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(8), Key(11)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11)});
 }
 
 TEST(SimpleSplitTree, RemoveFirst) {
@@ -190,7 +180,6 @@ TEST(SimpleSplitTree, RemoveFirst) {
 	BTreeTestUtils::requireSucces(tree.remove(2, &value));
 	CHECK(value == 2);
 	BTreeTestUtils::requireKeys(tree, {Key(5), Key(8), Key(11)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11)});
 }
 
 TEST(SimpleSplitTree, DontRemove) {
@@ -292,7 +281,6 @@ TEST(SimpleFrontHeavySplitTree, RedistSmaller1) {
 	CHECK(value == 8);
 
 	BTreeTestUtils::requireKeys(tree, {Key(1), Key(2), Key(5), Key(11)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(1), Key(2), Key(5), Key(8), Key(11)});
 }
 
 TEST(SimpleFrontHeavySplitTree, RedistSmaller2) {
@@ -301,7 +289,6 @@ TEST(SimpleFrontHeavySplitTree, RedistSmaller2) {
 	CHECK(value == 11);
 
 	BTreeTestUtils::requireKeys(tree, {Key(1), Key(2), Key(5), Key(8)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(1), Key(2), Key(5), Key(8), Key(11)});
 }
 
 
@@ -327,7 +314,6 @@ TEST(SimpleBackHeavySplitTree, RedistGreater1) {
 	CHECK(value == 2);
 
 	BTreeTestUtils::requireKeys(tree, {Key(5), Key(8), Key(11), Key(12)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(12)});
 }
 
 TEST(SimpleBackHeavySplitTree, RedistGreater2) {
@@ -336,7 +322,6 @@ TEST(SimpleBackHeavySplitTree, RedistGreater2) {
 	CHECK(value == 5);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(8), Key(11), Key(12)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(12)});
 }
 
 TEST(SimpleBackHeavySplitTree, SimpleRemove) {
@@ -345,7 +330,6 @@ TEST(SimpleBackHeavySplitTree, SimpleRemove) {
 	CHECK(value == 8);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(11), Key(12)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(12)});
 }
 
 TEST_GROUP(SimpleFullTwoLayerTree) {
@@ -464,7 +448,6 @@ TEST(SimpleBarelyThreeLayerTree, CollapseSmallSmall) {
 	CHECK(value == 2);
 
 	BTreeTestUtils::requireKeys(tree, {Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23)});
 }
 
 TEST(SimpleBarelyThreeLayerTree, CollapseBigSmall) {
@@ -473,7 +456,6 @@ TEST(SimpleBarelyThreeLayerTree, CollapseBigSmall) {
 	CHECK(value == 8);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(11), Key(14), Key(17), Key(20), Key(23)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23)});
 }
 
 TEST(SimpleBarelyThreeLayerTree, CollapseSmallBig) {
@@ -482,7 +464,6 @@ TEST(SimpleBarelyThreeLayerTree, CollapseSmallBig) {
 	CHECK(value == 14);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(8), Key(11), Key(17), Key(20), Key(23)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23)});
 }
 
 TEST(SimpleBarelyThreeLayerTree, CollapseBigBig) {
@@ -491,7 +472,6 @@ TEST(SimpleBarelyThreeLayerTree, CollapseBigBig) {
 	CHECK(value == 20);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(23)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23)});
 }
 
 TEST(SimpleBarelyThreeLayerTree, DontGrowMore) {
@@ -601,7 +581,6 @@ TEST(SimpleFrontHeavyThreeLayerTree, RedistSmaller) {
 	CHECK(value == 29);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
 }
 
 TEST(SimpleFrontHeavyThreeLayerTree, Traverse) {
@@ -615,7 +594,6 @@ TEST(SimpleFrontHeavyThreeLayerTree, Traverse) {
 
 	BTreeTestUtils::requireKeysAlways(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
 }
-
 
 TEST_GROUP(SimpleBackHeavyThreeLayerTree) {
 	TestTree tree;
@@ -648,7 +626,6 @@ TEST(SimpleBackHeavyThreeLayerTree, RedistGreater1) {
 	CHECK(value == 2);
 
 	BTreeTestUtils::requireKeys(tree, {Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
 }
 
 TEST(SimpleBackHeavyThreeLayerTree, RedistGreater2) {
@@ -657,7 +634,6 @@ TEST(SimpleBackHeavyThreeLayerTree, RedistGreater2) {
 	CHECK(value == 8);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
 }
 
 TEST(SimpleBackHeavyThreeLayerTree, RedistGreater3) {
@@ -666,7 +642,6 @@ TEST(SimpleBackHeavyThreeLayerTree, RedistGreater3) {
 	CHECK(value == 14);
 
 	BTreeTestUtils::requireKeys(tree, {Key(2), Key(5), Key(8), Key(11), Key(17), Key(20), Key(23), Key(26), Key(29)});
-	BTreeTestUtils::requireKeysOnFailure(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
 }
 
 TEST(SimpleBackHeavyThreeLayerTree, Search) {
@@ -682,6 +657,6 @@ TEST(SimpleBackHeavyThreeLayerTree, SearchDontFind) {
 	uintptr_t value;
 	Key key(13);
 	BTreeTestUtils::requireFailure(tree.get(key, value));
-
 	BTreeTestUtils::requireKeysAlways(tree, {Key(2), Key(5), Key(8), Key(11), Key(14), Key(17), Key(20), Key(23), Key(26), Key(29)});
 }
+

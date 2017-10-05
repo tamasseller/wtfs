@@ -80,7 +80,7 @@ inline bool MetaIndexKey<maxFilenameLength>::operator ==(const MetaIndexKey<maxF
 template<uint32_t maxFilenameLength>
 inline void MetaFullKey<maxFilenameLength>::set(const char* n, const char* end)
 {
-	indexed.hash = algorithm::Fnv::hash(n, end);
+	indexed.hash = pet::Fnv::hash(n, end);
 
 	for(uint32_t i=0; i<maxFilenameLength && n+i < end; i++)
 		name[i] = n[i];
@@ -101,14 +101,14 @@ template<uint32_t maxFilenameLength>
 inline MetaFullKey<maxFilenameLength>& MetaFullKey<maxFilenameLength>::operator =(const MetaFullKey<maxFilenameLength>& other) {
 	indexed = other.indexed;
 	id = other.id;
-	algorithm::Str::ncpy(name, other.name, (uint32_t)sizeof(name));
+	pet::Str::ncpy(name, other.name, (uint32_t)sizeof(name));
 	return *this;
 }
 
 template<uint32_t maxFilenameLength>
 inline bool MetaFullKey<maxFilenameLength>::operator >(const MetaFullKey<maxFilenameLength>& than) const {
 	if(indexed == than.indexed)
-		return algorithm::Str::ncmp(name, than.name, maxFilenameLength) > 0;
+		return pet::Str::ncmp(name, than.name, maxFilenameLength) > 0;
 	else
 		return indexed > than.indexed;
 }
@@ -116,7 +116,7 @@ inline bool MetaFullKey<maxFilenameLength>::operator >(const MetaFullKey<maxFile
 template<uint32_t maxFilenameLength>
 inline bool MetaFullKey<maxFilenameLength>::operator ==(const MetaFullKey<maxFilenameLength>& to) const {
 	if (indexed == to.indexed)
-		return algorithm::Str::ncmp(name, to.name, maxFilenameLength) == 0;
+		return pet::Str::ncmp(name, to.name, maxFilenameLength) == 0;
 	else
 		return false;
 }

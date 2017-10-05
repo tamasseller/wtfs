@@ -17,7 +17,7 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "BTreeParametrizedForTesting.h"
 
@@ -37,56 +37,51 @@ TEST_GROUP(PoorHash) {
 	static constexpr unsigned int scale = size/5;
 
 	TEST_SETUP() {
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 		for(unsigned int i=0; i<size; i += 2) {
-			ubiq::GenericError ret = tree.put(10*i, 5*i);
+			pet::GenericError ret = tree.put(10*i, 5*i);
 			CHECK(!ret.failed());
 			CHECK(ret);
 		}
 
 		for(int i=size-1; i>0; i -= 2) {
-			ubiq::GenericError ret = tree.put(10*i, 5*i);
+			pet::GenericError ret = tree.put(10*i, 5*i);
 			CHECK(!ret.failed());
 			CHECK(ret);
 		}
 
-		ENABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::enable();
 	}
 
 	TEST_TEARDOWN() {
 		int i = 0;
-		DISABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::disable();
 		for(unsigned int i=0; i<size; i++) {
-			ubiq::GenericError ret = tree.remove(10*i);
+			pet::GenericError ret = tree.remove(10*i);
 			CHECK(!ret.failed());
 		}
-		ENABLE_FAILURE_INJECTION_TEMPORARILY();
+		pet::FailureInjector::enable();
 
 		BTreeTestUtils::finalCheckAndCleanup(tree);
 	}
 };
 
 TEST(PoorHash, AddOne) {
-	SET_FAILURE_INJECTION_MODE_SHARED()
-	ubiq::GenericError ret = tree.put(123, -1);
-	CHECK_ON_FAILURE(ret.failed());
+	pet::GenericError ret = tree.put(123, -1);
 	CHECK(!ret.failed());
 	CHECK(ret);
 };
 
 TEST(PoorHash, DontInsert) {
-	SET_FAILURE_INJECTION_MODE_SHARED()
 	for(unsigned int i=0; i<size/scale; i++) {
-		ubiq::GenericError ret = tree.insert(scale*10*i, -1);
+		pet::GenericError ret = tree.insert(scale*10*i, -1);
 		CHECK(!ret.failed());
 		CHECK(!ret);
 	}
 };
 
 TEST(PoorHash, DontUpdate) {
-	SET_FAILURE_INJECTION_MODE_SHARED()
-	ubiq::GenericError ret = tree.update(1, -1);
-	CHECK_ON_FAILURE(ret.failed());
+	pet::GenericError ret = tree.update(1, -1);
 	CHECK(!ret.failed());
 	CHECK(!ret);
 };
@@ -94,8 +89,7 @@ TEST(PoorHash, DontUpdate) {
 TEST(PoorHash, GetOne) {
 	PoorHashKey key(100);
 	int value;
-	ubiq::GenericError ret = tree.get(key, value);
-	CHECK_ON_FAILURE(ret.failed());
+	pet::GenericError ret = tree.get(key, value);
 	CHECK(!ret.failed());
 	CHECK(ret);
 	CHECK(key == 100);
@@ -103,26 +97,22 @@ TEST(PoorHash, GetOne) {
 };
 
 TEST(PoorHash, DontGet) {
-	SET_FAILURE_INJECTION_MODE_SHARED()
 	PoorHashKey key(123);
 	int value;
-	ubiq::GenericError ret = tree.get(key, value);
-	CHECK_ON_FAILURE(ret.failed());
+	pet::GenericError ret = tree.get(key, value);
 	CHECK(!ret.failed());
 	CHECK(!ret);
 	CHECK(key == 123);
 };
 
 TEST(PoorHash, RemoveOne) {
-	ubiq::GenericError ret = tree.remove(100);
-	CHECK_ON_FAILURE(ret.failed());
+	pet::GenericError ret = tree.remove(100);
 	CHECK(!ret.failed());
 	CHECK(ret);
 };
 
 TEST(PoorHash, DontRemove) {
-	ubiq::GenericError ret = tree.remove(101);
-	CHECK_ON_FAILURE(ret.failed());
+	pet::GenericError ret = tree.remove(101);
 	CHECK(!ret.failed());
 	CHECK(!ret);
 };

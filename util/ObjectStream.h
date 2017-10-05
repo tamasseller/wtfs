@@ -28,11 +28,11 @@
 
 template<class Stream>
 struct ObjectStream: public Stream {
-	ubiq::GenericError writeCopy(const void* src, uint32_t size)
+	pet::GenericError writeCopy(const void* src, uint32_t size)
 	{
 		for(uint32_t n = size; n ;) {
 			void* dst;
-			ubiq::GenericError ret = Stream::write(dst, n);
+			pet::GenericError ret = Stream::write(dst, n);
 
 			if(ret.failed())
 				return ret.rethrow();
@@ -45,13 +45,13 @@ struct ObjectStream: public Stream {
 		return size;
 	}
 
-	ubiq::GenericError readCopy(void* dst, uint32_t size) {
+	pet::GenericError readCopy(void* dst, uint32_t size) {
 		for(uint32_t n = size; n ;) {
 			void* src;
-			ubiq::GenericError ret = Stream::read(src, n);
+			pet::GenericError ret = Stream::read(src, n);
 
 			if(ret.failed()) {
-				if(ret == ubiq::GenericError::invalidSeek)
+				if(ret == pet::GenericError::invalidSeek)
 					return 0;
 
 				return ret.rethrow();

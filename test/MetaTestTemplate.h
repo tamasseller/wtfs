@@ -27,18 +27,18 @@
 
 template <class Fs>
 struct FsMetaTestTemplate {
-	static void requireSuccess(ubiq::GenericError status) {
+	static void requireSuccess(pet::GenericError status) {
 		CHECK(!status.failed());
 		CHECK(status);
 	}
 
-	static void requireFailure(ubiq::GenericError status) {
+	static void requireFailure(pet::GenericError status) {
 		CHECK(!status.failed());
 		CHECK(!status);
 	}
 
 	template<class Error>
-	static void requireError(ubiq::GenericError status, Error error) {
+	static void requireError(pet::GenericError status, Error error) {
 		CHECK(status.failed());
 		CHECK(status == error);
 	}
@@ -48,52 +48,52 @@ struct FsMetaTestTemplate {
 
 		inline void uninitializedNodeInvalidArgumentFetchChildById() {
 			typename Fs::Node node;
-			requireError(fs.fetchChildById(node, 2), ubiq::GenericError::invalidArgument);
+			requireError(fs.fetchChildById(node, 2), pet::GenericError::invalidArgument);
 		}
 
 		inline void uninitializedNodeInvalidArgumentFetchByName() {
 			typename Fs::Node node;
 			const char *name = "asd";
-			requireError(fs.fetchChildByName(node, name, name + strlen(name)), ubiq::GenericError::invalidArgument);
+			requireError(fs.fetchChildByName(node, name, name + strlen(name)), pet::GenericError::invalidArgument);
 		}
 
 		inline void uninitializedNodeInvalidArgumentFetchFirst() {
 			typename Fs::Node node;
-			requireError(fs.fetchFirstChild(node), ubiq::GenericError::invalidArgument);
+			requireError(fs.fetchFirstChild(node), pet::GenericError::invalidArgument);
 		}
 
 		inline void uninitializedNodeInvalidArgumentFetchNext() {
 			typename Fs::Node node;
-			requireError(fs.fetchNextSibling(node), ubiq::GenericError::invalidArgument);
+			requireError(fs.fetchNextSibling(node), pet::GenericError::invalidArgument);
 		}
 
 		inline void uninitializedNodeInvalidArgumentRemove() {
 			typename Fs::Node node;
-			requireError(fs.removeNode(node), ubiq::GenericError::invalidArgument);
+			requireError(fs.removeNode(node), pet::GenericError::invalidArgument);
 		}
 
 		inline void uninitializedNodeInvalidArgumentAdd() {
 			typename Fs::Node node;
-			requireError(fs.fetchFirstChild(node), ubiq::GenericError::invalidArgument);
+			requireError(fs.fetchFirstChild(node), pet::GenericError::invalidArgument);
 		}
 
 		inline void noSuchId() {
 			typename Fs::Node node;
 			requireSuccess(fs.fetchRoot(node));
-			requireError(fs.fetchChildById(node, 2), ubiq::GenericError::noSuchEntry);
+			requireError(fs.fetchChildById(node, 2), pet::GenericError::noSuchEntry);
 		}
 
 		inline void noSuchName() {
 			typename Fs::Node node;
 			requireSuccess(fs.fetchRoot(node));
 			const char *name = "asd";
-			requireError(fs.fetchChildByName(node, name, name + strlen(name)), ubiq::GenericError::noSuchEntry);
+			requireError(fs.fetchChildByName(node, name, name + strlen(name)), pet::GenericError::noSuchEntry);
 		}
 
 		inline void removeRoot() {
 			typename Fs::Node node;
 			requireSuccess(fs.fetchRoot(node));
-			requireError(fs.removeNode(node), ubiq::GenericError::invalidArgument);
+			requireError(fs.removeNode(node), pet::GenericError::invalidArgument);
 		}
 
 		inline void noChild() {
@@ -118,7 +118,7 @@ struct FsMetaTestTemplate {
 
 			typename Fs::Node nodeAgain;
 			requireSuccess(fs.fetchRoot(nodeAgain));
-			requireError(fs.newFile(nodeAgain, name, name + strlen(name)), ubiq::GenericError::alreadyExists);
+			requireError(fs.newFile(nodeAgain, name, name + strlen(name)), pet::GenericError::alreadyExists);
 		}
 
 		inline void addAnotherFile() {
@@ -185,7 +185,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchChildById(node, dirId));
 			const char *start, *end;
 			node.getName(start, end);
-			STRCMP_EQUAL(dirName, start);
+			CHECK(start && strcmp(dirName, start) == 0);
 		}
 
 		inline void copyName() {
@@ -197,13 +197,13 @@ struct FsMetaTestTemplate {
 			char temp[tmpSize];
 			node.copyName(temp, sizeof(temp));
 
-			CHECK(strcmp(dirName, temp) == 0);
+			CHECK(temp && strcmp(dirName, temp) == 0);
 
 			constexpr auto partialSize = (strlen(dirName) + 1)/2;
 			char partial[partialSize ];
 			node.copyName(partial, sizeof(partial));
 
-			CHECK(strncmp(dirName, partial, sizeof(partial)-1) == 0);
+			CHECK(partial && strncmp(dirName, partial, sizeof(partial)-1) == 0);
 		}
 
 		inline void isDir() {
@@ -219,7 +219,7 @@ struct FsMetaTestTemplate {
 			typename Fs::Node node;
 			requireSuccess(fs.fetchRoot(node));
 			requireSuccess(fs.fetchChildById(node, dirId));
-			requireError(fs.fetchChildById(node, dirId), ubiq::GenericError::noSuchEntry);
+			requireError(fs.fetchChildById(node, dirId), pet::GenericError::noSuchEntry);
 		}
 
 		inline void findInSubdirById() {
@@ -229,7 +229,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchChildById(node, fileId));
 			const char *start, *end;
 			node.getName(start, end);
-			STRCMP_EQUAL(fileName, start);
+			CHECK(start && strcmp(fileName, start) == 0);
 		}
 
 		inline void findInRootByName() {
@@ -238,7 +238,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchChildByName(node, dirName, dirName + strlen(dirName)));
 			const char *start, *end;
 			node.getName(start, end);
-			STRCMP_EQUAL(dirName, start);
+			CHECK(start && strcmp(dirName, start) == 0);
 		}
 
 		inline void findInSubdirByName() {
@@ -248,7 +248,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchChildByName(node, fileName, fileName + strlen(fileName)));
 			const char *start, *end;
 			node.getName(start, end);
-			STRCMP_EQUAL(fileName, start);
+			CHECK(start && strcmp(fileName, start) == 0);
 		}
 
 		inline void findByNameDefaultArg() {
@@ -258,7 +258,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchChildByName(node, fileName));
 			const char *start, *end;
 			node.getName(start, end);
-			STRCMP_EQUAL(fileName, start);
+			CHECK(start && strcmp(fileName, start) == 0);
 		}
 
 
@@ -273,17 +273,17 @@ struct FsMetaTestTemplate {
 		inline void failNonDirectIdFetch() {
 			typename Fs::Node node;
 			requireSuccess(fs.fetchRoot(node));
-			requireError(fs.fetchChildById(node, fileId), ubiq::GenericError::noSuchEntry);
+			requireError(fs.fetchChildById(node, fileId), pet::GenericError::noSuchEntry);
 		}
 
 		inline void failToDeleteFoo() {
 			typename Fs::Node node;
 			requireSuccess(fs.fetchRoot(node));
 			requireSuccess(fs.fetchChildById(node, dirId));
-			ubiq::GenericError ret = fs.removeNode(node);
+			pet::GenericError ret = fs.removeNode(node);
 
 			CHECK(ret.failed());
-			CHECK(ret == ubiq::GenericError::notEmpty);
+			CHECK(ret == pet::GenericError::notEmpty);
 		}
 
 		inline void deleteBar() {
@@ -335,15 +335,15 @@ struct FsMetaTestTemplate {
 			if(!start)
 				return;
 
-			bool firstWasFoo = (strcmp(start, fooName) == 0);
-			bool firstWasBar = (strcmp(start, barName) == 0);
+			bool firstWasFoo = (start && strcmp(start, fooName) == 0);
+			bool firstWasBar = (start && strcmp(start, barName) == 0);
 			CHECK(firstWasFoo || firstWasBar);
 
 			requireSuccess(fs.fetchNextSibling(node));
 			node.getName(start, unused);
 
-			bool secondWasFoo = (strcmp(start, fooName) == 0);
-			bool secondWasBar = (strcmp(start, barName) == 0);
+			bool secondWasFoo = (start && strcmp(start, fooName) == 0);
+			bool secondWasBar = (start && strcmp(start, barName) == 0);
 			CHECK(secondWasFoo || secondWasBar);
 			CHECK((firstWasFoo && secondWasBar) || (secondWasFoo && firstWasBar));
 
@@ -358,7 +358,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchFirstChild(node2));
 
 			requireSuccess(fs.removeNode(node1));
-			requireError(fs.removeNode(node2), ubiq::GenericError::noSuchEntry);
+			requireError(fs.removeNode(node2), pet::GenericError::noSuchEntry);
 		}
 
 		inline void concurrentCreate() {
@@ -367,7 +367,7 @@ struct FsMetaTestTemplate {
 			requireSuccess(fs.fetchRoot(node2));
 			const char *fooBar = "foobar";
 			requireSuccess(fs.newFile(node1, fooBar, fooBar + strlen(fooBar)));
-			requireError(fs.newFile(node2, fooBar, fooBar + strlen(fooBar)), ubiq::GenericError::alreadyExists);
+			requireError(fs.newFile(node2, fooBar, fooBar + strlen(fooBar)), pet::GenericError::alreadyExists);
 		}
 	};
 };

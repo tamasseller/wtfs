@@ -17,8 +17,8 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
+#include "1test/Test.h"
+#include "1test/Mock.h"
 
 #include "MockFlashDriver.h"
 
@@ -28,28 +28,29 @@
 typedef MockFlashDriver<1, 1, 1> FlashDriver;
 
 namespace {
-	struct MockStorageManager {
-		unsigned int addr=0;
-		FlashDriver::Address allocate(int level) {
-			unsigned int ret = addr++;
-			mock("StorageManager").actualCall("allocate").withIntParameter("level", level);
-			return ret;
-		}
+struct MockStorageManager {
+	unsigned int addr = 0;
+	FlashDriver::Address allocate(int level) {
+		unsigned int ret = addr++;
+		MOCK("StorageManager")::CALL("allocate").withParam(level);
+		return ret;
+	}
 
-		void reclaim(FlashDriver::Address addr) {
-			mock("StorageManager").actualCall("reclaim").withIntParameter("addr", addr);
-		}
-	};
+	void reclaim(FlashDriver::Address addr) {
+		MOCK("StorageManager")::CALL("reclaim").withParam(addr);
+	}
+};
 
-	typedef BufferedStorage<FlashDriver, MockStorageManager, DefaultNolockConfig::Mutex, 2> MockedBufferedStorage;
+typedef BufferedStorage<FlashDriver, MockStorageManager,
+		DefaultNolockConfig::Mutex, 2> MockedBufferedStorage;
 
-	struct TestData: private MockedBufferedStorage::Initializer {
-		MockedBufferedStorage storage;
-		MockStorageManager manager;
-		TestData() {
-			MockedBufferedStorage::Initializer::initialize(&storage, &manager);
-		}
-	};
+struct TestData: private MockedBufferedStorage::Initializer {
+	MockedBufferedStorage storage;
+	MockStorageManager manager;
+	TestData() {
+		MockedBufferedStorage::Initializer::initialize(&storage, &manager);
+	}
+};
 }
 
 TEST_GROUP(BufferedStorageEmpty) {
@@ -60,8 +61,6 @@ TEST_GROUP(BufferedStorageEmpty) {
 	}
 
 	TEST_TEARDOWN() {
-		mock().checkExpectations();
-		mock().clear();
 		delete test;
 	}
 };
@@ -73,97 +72,103 @@ TEST(BufferedStorageEmpty, Exhaust) {
 }
 
 TEST(BufferedStorageEmpty, read) {
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 12);
+	MOCK("FlashDriver")::EXPECT("read").withParam(12);
 	MockedBufferedStorage::Buffer* buffer = test->storage.find(12);
 	buffer->data.level = 23;
 	test->storage.release(buffer, BufferReleaseCondition::Clean);
 }
 
 TEST(BufferedStorageEmpty, writeNewAlloc) {
-	MockedBufferedStorage::Buffer* buffer = test->storage.find(FlashDriver::InvalidAddress);
+	MockedBufferedStorage::Buffer* buffer = test->storage.find(
+			FlashDriver::InvalidAddress);
 	buffer->data.level = 23;
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 23);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(23);
 	test->storage.release(buffer, BufferReleaseCondition::Dirty);
 }
 
 TEST(BufferedStorageEmpty, writeNewFlushWrite) {
-	MockedBufferedStorage::Buffer* buffer = test->storage.find(FlashDriver::InvalidAddress);
+	MockedBufferedStorage::Buffer* buffer = test->storage.find(
+			FlashDriver::InvalidAddress);
 	buffer->data.level = 23;
 
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 23);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(23);
 	test->storage.release(buffer, BufferReleaseCondition::Dirty);
 
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
 	test->storage.flush();
 }
 
 TEST(BufferedStorageEmpty, concurrentReadValidSame) {
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 12);
+	MOCK("FlashDriver")::EXPECT("read").withParam(12);
 	MockedBufferedStorage::Buffer* buffer1 = test->storage.find(12);
 	MockedBufferedStorage::Buffer* buffer2 = test->storage.find(12);
 	CHECK(buffer1 == buffer2);
 }
 
 TEST(BufferedStorageEmpty, concurrentReadInvalidDifferent) {
-	MockedBufferedStorage::Buffer* buffer1 = test->storage.find(FlashDriver::InvalidAddress);
-	MockedBufferedStorage::Buffer* buffer2 = test->storage.find(FlashDriver::InvalidAddress);
+	MockedBufferedStorage::Buffer* buffer1 = test->storage.find(
+			FlashDriver::InvalidAddress);
+	MockedBufferedStorage::Buffer* buffer2 = test->storage.find(
+			FlashDriver::InvalidAddress);
 	CHECK(buffer1 != buffer2);
 }
 
 TEST(BufferedStorageEmpty, writingTwiceResultsInOneActualAllocPlusWrite) {
-	MockedBufferedStorage::Buffer* buffer = test->storage.find(FlashDriver::InvalidAddress);
+	MockedBufferedStorage::Buffer* buffer = test->storage.find(
+			FlashDriver::InvalidAddress);
 	buffer->data.level = 23;
 
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 23);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(23);
 	test->storage.release(buffer, BufferReleaseCondition::Dirty);
 
 	buffer = test->storage.find(0);
 	test->storage.release(buffer, BufferReleaseCondition::Dirty);
 
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
 	test->storage.flush();
 }
 
 TEST(BufferedStorageEmpty, updateReclaim) {
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 123);
+	MOCK("FlashDriver")::EXPECT("read").withParam(123);
 	MockedBufferedStorage::Buffer* buffer = test->storage.find(123);
 	buffer->data.level = 45;
 
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 45);
-	mock("StorageManager").expectOneCall("reclaim").withIntParameter("addr", 123);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(45);
+	MOCK("StorageManager")::EXPECT("reclaim").withParam(123);
 	test->storage.release(buffer, BufferReleaseCondition::Dirty);
 
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
 	test->storage.flush();
 }
 
 TEST(BufferedStorageEmpty, dispose) {
-	MockedBufferedStorage::Buffer* buffer = test->storage.find(FlashDriver::InvalidAddress);
+	MockedBufferedStorage::Buffer* buffer = test->storage.find(
+			FlashDriver::InvalidAddress);
 	buffer->data.level = 45;
 
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 45);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(45);
 	test->storage.release(buffer, BufferReleaseCondition::Dirty);
 
 	buffer = test->storage.find(0);
 
-	mock("StorageManager").expectOneCall("reclaim").withIntParameter("addr", 0);
+	MOCK("StorageManager")::EXPECT("reclaim").withParam(0);
 	test->storage.release(buffer, BufferReleaseCondition::Purge);
 
 	test->storage.flush();
 }
 
 TEST(BufferedStorageEmpty, evictCleanForRead) {
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 100);
+	MOCK("FlashDriver")::EXPECT("read").withParam(100);
 	MockedBufferedStorage::Buffer* buffer1 = test->storage.find(100);
 	buffer1->data.level = 1;
 	test->storage.release(buffer1, BufferReleaseCondition::Clean);
 
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 200);
+	MOCK("FlashDriver")::EXPECT("read").withParam(200);
 	MockedBufferedStorage::Buffer* buffer2 = test->storage.find(200);
 	buffer2->data.level = 2;
 	test->storage.release(buffer2, BufferReleaseCondition::Clean);
 
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 300);
+	MOCK("FlashDriver")::EXPECT("read").withParam(300);
 	MockedBufferedStorage::Buffer* buffer3 = test->storage.find(300);
 	buffer3->data.level = 3;
 	test->storage.release(buffer3, BufferReleaseCondition::Clean);
@@ -174,12 +179,12 @@ TEST(BufferedStorageEmpty, evictCleanForRead) {
 }
 
 TEST(BufferedStorageEmpty, evictCleanForEmpty) {
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 100);
+	MOCK("FlashDriver")::EXPECT("read").withParam(100);
 	MockedBufferedStorage::Buffer* buffer1 = test->storage.find(100);
 	buffer1->data.level = 1;
 	test->storage.release(buffer1, BufferReleaseCondition::Clean);
 
-	mock("FlashDriver").expectOneCall("read").withIntParameter("addr", 200);
+	MOCK("FlashDriver")::EXPECT("read").withParam(200);
 	MockedBufferedStorage::Buffer* buffer2 = test->storage.find(200);
 	buffer2->data.level = 2;
 	test->storage.release(buffer2, BufferReleaseCondition::Clean);
@@ -202,26 +207,23 @@ TEST_GROUP(BufferedStorageFull) {
 
 		buffer1 = test->storage.find(FlashDriver::InvalidAddress);
 		buffer1->data.level = 1;
-		mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 1);
+		MOCK("StorageManager")::EXPECT("allocate").withParam(1);
 		test->storage.release(buffer1, BufferReleaseCondition::Dirty);
 
 		buffer2 = test->storage.find(FlashDriver::InvalidAddress);
 		buffer2->data.level = 2;
-		mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 2);
+		MOCK("StorageManager")::EXPECT("allocate").withParam(2);
 		test->storage.release(buffer2, BufferReleaseCondition::Dirty);
 	}
 
 	TEST_TEARDOWN() {
-		mock().checkExpectations();
-		mock().clear();
 		delete test;
 	}
 };
 
 TEST(BufferedStorageFull, flushOrderSimple) {
-	mock().strictOrder();
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 1);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(1);
 	test->storage.flush();
 }
 
@@ -230,51 +232,50 @@ TEST(BufferedStorageFull, flushOrderChanged) {
 	CHECK(buffer3 == buffer1);
 	test->storage.release(buffer1, BufferReleaseCondition::Dirty);
 
-	mock().strictOrder();
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 1);
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(1);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
 	test->storage.flush();
 }
 
 TEST(BufferedStorageFull, dirtyEvictionSimple) {
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
 	buffer2 = test->storage.find(FlashDriver::InvalidAddress);
 }
 
 TEST(BufferedStorageFull, dirtyEvictionOther) {
 	test->storage.release(test->storage.find(0), BufferReleaseCondition::Dirty);
 
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 1);
+	MOCK("FlashDriver")::EXPECT("write").withParam(1);
 	buffer2 = test->storage.find(FlashDriver::InvalidAddress);
 }
 
 TEST(BufferedStorageFull, moreRecentCleanChoosen) {
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 1);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(1);
 	test->storage.flush();
 
 	MockedBufferedStorage::Buffer* buffer3 = test->storage.find(0);
 
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 1);
-	mock("StorageManager").expectOneCall("reclaim").withIntParameter("addr", 0);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(1);
+	MOCK("StorageManager")::EXPECT("reclaim").withParam(0);
 	test->storage.release(buffer3, BufferReleaseCondition::Dirty);
 	test->storage.release(test->storage.find(1), BufferReleaseCondition::Clean);
 	test->storage.find(FlashDriver::InvalidAddress);
 }
 
 TEST(BufferedStorageFull, veryOldDirtyChoosen) {
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 0);
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 1);
+	MOCK("FlashDriver")::EXPECT("write").withParam(0);
+	MOCK("FlashDriver")::EXPECT("write").withParam(1);
 	test->storage.flush();
 
 	MockedBufferedStorage::Buffer* buffer3 = test->storage.find(0);
 
-	mock("StorageManager").expectOneCall("allocate").withIntParameter("level", 1);
-	mock("StorageManager").expectOneCall("reclaim").withIntParameter("addr", 0);
+	MOCK("StorageManager")::EXPECT("allocate").withParam(1);
+	MOCK("StorageManager")::EXPECT("reclaim").withParam(0);
 	test->storage.release(buffer3, BufferReleaseCondition::Dirty);
 	test->storage.release(test->storage.find(1), BufferReleaseCondition::Clean);
 	test->storage.release(test->storage.find(1), BufferReleaseCondition::Clean);
 
-	mock("FlashDriver").expectOneCall("write").withIntParameter("addr", 2);
+	MOCK("FlashDriver")::EXPECT("write").withParam(2);
 	test->storage.find(FlashDriver::InvalidAddress);
 }

@@ -17,33 +17,9 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/CommandLineTestRunner.h"
-#include "CppUTest/TestRegistry.h"
-#include "CppUTest/MemoryLeakWarningPlugin.h"
+#include "1test/TestRunner.h"
 
-#include "Oops.h"
-#include "FailureInjectorPlugin.h"
-#include "Addr2lineBacktrace.h"
-
-void oops() {
-	FailureInjectorPlugin::instance()->printLastTrace();
-}
-
-void always() {
-	std::cout << "\033[0m" << std::endl;
-}
-
-int main(int ac, char** av)
+int main()
 {
-	OopsUtils<oops, always>::registerOopsHandlers();
-
-	FailureInjectorPlugin::instance()->setBacktraceFactory(new Addr2lineBacktraceFactory);
-	TestRegistry::getCurrentRegistry()->installPlugin(FailureInjectorPlugin::instance());
-    MemoryLeakWarningPlugin::destroyGlobalDetector();
-
-    auto ret = CommandLineTestRunner::RunAllTests(ac, av);
-
-    OopsUtils<oops, always>::allWentOk();
-
-    return ret;
+    return pet::TestRunner::runAllTests();
 }

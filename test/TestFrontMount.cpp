@@ -5,7 +5,7 @@
  *      Author: tooma
  */
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "FrontCommon.h"
 
@@ -18,7 +18,7 @@ TEST_GROUP(MountWoGc) {
 	Fs::State initialState;
 
 	TEST_SETUP() {
-		mock().disable();
+		MOCK("FlashDriver")::disable();
 		Fs fs;
 		NodeStream foo(fs, "foo"), bar(fs, "bar"), baz(fs, "baz");
 		NodeStream dummy1(fs, "dummy1"), dummy2(fs, "dummy2");

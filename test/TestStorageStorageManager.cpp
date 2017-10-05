@@ -21,8 +21,8 @@
 
 #include "storage/StorageManager.h"
 
-#include "CppUTest/TestHarness.h"
-#include "CppUTestExt/MockSupport.h"
+#include "1test/Test.h"
+#include "1test/Mock.h"
 
 namespace {
 	template<unsigned int pageSize, unsigned int blockSize, unsigned int deviceSize, unsigned int maxMeta, unsigned int maxFile>

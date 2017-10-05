@@ -28,7 +28,7 @@
 class StorageManagerTrace;
 
 template <class FlashDriver, uint32_t maxMetaLevels, uint32_t maxFileLevels>
-class StorageManager: ubiq::Trace<StorageManagerTrace> {
+class StorageManager: pet::Trace<StorageManagerTrace> {
 	public:
 		typedef typename FlashDriver::Address Address;
 	protected:

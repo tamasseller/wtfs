@@ -20,11 +20,11 @@
 #ifndef MOCKFLASHDRIVER_H_
 #define MOCKFLASHDRIVER_H_
 
-#include "CppUTestExt/MockSupport.h"
+#include "1test/Mock.h"
 
 #include "ubiquitous/Trace.h"
 
-class MockFlashTrace: public ubiq::Trace<MockFlashTrace> {};
+class MockFlashTrace: public pet::Trace<MockFlashTrace> {};
 
 template<unsigned int bytesPerPage, unsigned int pagesPerBlock, unsigned int nBlocks>
 class MockFlashDriver {
@@ -48,7 +48,7 @@ public:
 
 	static void read(Address addr, void* data) {
 		MockFlashTrace::info << "read: " << addr << "\n";
-		mock("FlashDriver").actualCall("read").withIntParameter("addr", addr);
+		MOCK("FlashDriver")::CALL("read").withParam(addr);
 
 		for(unsigned int i=0; i<pageSize; i++)
 			((char*)data)[i] = blocks[addr / blockSize][addr % blockSize][i];
@@ -56,7 +56,7 @@ public:
 
 	static void write(Address addr, void* data) {
 		MockFlashTrace::info << "write: " << addr << "\n";
-		mock("FlashDriver").actualCall("write").withIntParameter("addr", addr);
+		MOCK("FlashDriver")::CALL("write").withParam(addr);
 
 		for(unsigned int i=0; i<pageSize; i++)
 			blocks[addr / blockSize][addr % blockSize][i] &= ((char*)data)[i];

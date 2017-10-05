@@ -42,19 +42,19 @@ struct FsStreamTestTemplate {
 
 		void teardown() {
 			CHECK(!fs.flushStream(stream).failed());
-			DISABLE_FAILURE_INJECTION_TEMPORARILY();
+			pet::FailureInjector::disable();
 			CHECK_ALWAYS(FailableAllocator::allFreed());
 			CHECK(!fs.removeNode(node).failed());
-			ENABLE_FAILURE_INJECTION_TEMPORARILY();
+			pet::FailureInjector::enable();
 		}
 
 		void write(const char* data, unsigned int length, ObjectStream<typename Fs::Stream> *stream=0) {
 			if(!stream)
 				stream = &this->stream;
 
-			ubiq::GenericError ret = stream->writeCopy(data, length);
+			pet::GenericError ret = stream->writeCopy(data, length);
 			CHECK(!ret.failed());
-			CHECK_EQUAL(length, ret);
+			CHECK(length == ret);
 		}
 
 		void read(const char* data, unsigned int length, ObjectStream<typename Fs::Stream> *stream=0) {
@@ -63,10 +63,10 @@ struct FsStreamTestTemplate {
 
 			char* buffer = new char[length];
 
-			ubiq::GenericError ret = stream->readCopy(buffer, length);
+			pet::GenericError ret = stream->readCopy(buffer, length);
 			CHECK(!ret.failed());
 			if(!ret.failed()) {
-				CHECK_EQUAL(length, ret);
+				CHECK(length == ret);
 				CHECK(memcmp(data, buffer, length) == 0);
 			}
 
@@ -87,14 +87,14 @@ struct FsStreamTestTemplate {
 		}
 
 		inline void readZero() {
-			ubiq::GenericError ret = test->stream.readCopy(0, 0);
+			pet::GenericError ret = test->stream.readCopy(0, 0);
 			CHECK(!ret.failed());
 			CHECK(ret == 0);
 		}
 
 		inline void readOne() {
 			char c;
-			ubiq::GenericError ret = test->stream.readCopy(&c, 1);
+			pet::GenericError ret = test->stream.readCopy(&c, 1);
 			CHECK(!ret.failed());
 			CHECK(ret == 0);
 		}
@@ -119,26 +119,25 @@ struct FsStreamTestTemplate {
 		}
 
 		inline void seekyModify() {
-			SET_FAILURE_INJECTION_MODE_SHARED();
 			const unsigned int N = 12*12+1;						/* create 4byte sequence data */
 			static unsigned int data[N];
 			for(unsigned int i = 0; i<N; i++)
 				data[i] = i;
 
 			static int temp = 0;
-			ubiq::GenericError ret1 = test->stream.writeCopy((const char*)&temp, (unsigned int)sizeof(temp));
+			pet::GenericError ret1 = test->stream.writeCopy((const char*)&temp, (unsigned int)sizeof(temp));
 			CHECK(!ret1.failed());
 			if(ret1.failed())
 				return;
 
 			while(1) {
-				ubiq::GenericError ret2 = test->stream.setPosition(Fs::Stream::Current, -(unsigned int)sizeof(temp));
+				pet::GenericError ret2 = test->stream.setPosition(Fs::Stream::Current, -(unsigned int)sizeof(temp));
 				CHECK(!ret2.failed());
 				if(ret2.failed()) {
 					return;
 				}
 
-				ubiq::GenericError ret3 = test->stream.readCopy((char*)&temp, (unsigned int)sizeof(temp));
+				pet::GenericError ret3 = test->stream.readCopy((char*)&temp, (unsigned int)sizeof(temp));
 				CHECK(!ret3.failed());
 				if(ret3.failed())
 					return;
@@ -148,7 +147,7 @@ struct FsStreamTestTemplate {
 					break;
 
 
-				ubiq::GenericError ret4 = test->stream.writeCopy((char*)&temp, (unsigned int)sizeof(temp));
+				pet::GenericError ret4 = test->stream.writeCopy((char*)&temp, (unsigned int)sizeof(temp));
 				CHECK(!ret4.failed());
 				if(ret4.failed())
 					return;
@@ -175,10 +174,10 @@ struct FsStreamTestTemplate {
 		StreamTestData *test;
 
 		inline void setup() {
-			DISABLE_FAILURE_INJECTION_TEMPORARILY();
+			pet::FailureInjector::disable();
 			test = new StreamTestData;
 			test->write(lipsum, sizeof(lipsum));
-			ENABLE_FAILURE_INJECTION_TEMPORARILY();
+			pet::FailureInjector::enable();
 		}
 
 		inline void teardown() {

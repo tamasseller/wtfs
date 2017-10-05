@@ -4,16 +4,22 @@ For 1.0
 Cleanup
 -------
 
- + Add default value for second argument of fetchChildByName, that enables it to be used conveniently on C strings.
- + Add copyName helper into Node, to ease its use with pure C strings (via some kind of utility decorator CRTP stuff).
- + Check with -m32 and -m64
- - -Wall proofing all tests (add -Wall -Werror to the global makefile)
  - On HW test suite (big pseudo random data, many files, funny directory structures).
  - Config static_assert sanity checks.
 
 Implementation
 --------------
 
+ - Add give-back method to Stream (for partially read/written buffers)
+
+ - Add erase session variant that does not do any logging (as it supports only erase and that can not fail)
+ - Fix memory runaway on deleting large file.
+ - Add non deleting truncate-to-zero API.
+
+ - Add configuration hash generation (one byte is enough)
+ - Add check byte masked with the config hash, to avoid crashing on random data.
+ - Implement unstable state double (or triple) checking in mount logic.
+ 
  - Enable FlashDriver to return errors (ok, corrected, not correctable)
  - Update README example code.
  - Propagate low-level errors from BufferedStorage.
@@ -21,13 +27,6 @@ Implementation
  - Implement bad block marking/detection to the driver interface.
  - Implement bad block avoidance in block allocation logic.
  - Add sw ECC logic as driver helper.
- - Add erase session variant that does not do any logging (as it supports only erase and that can not fail)
- - Fix memory runaway on deleting large file.
- - Add non deleting truncate-to-zero API.
- - Add configuration hash generation (one byte is enough)
- - Add check byte masked with the config hash, to avoid crashing on random data.
- - Add give-back method to Stream (for partially read/written buffers)
- - Implement unstable state double (or triple) checking in mount logic.
  
 Testing
 -------

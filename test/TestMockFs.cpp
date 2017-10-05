@@ -17,14 +17,14 @@
  *
  *******************************************************************************/
 
-#include "CppUTest/TestHarness.h"
+#include "1test/Test.h"
 
 #include "MockFs.h"
 
 #include "StreamTestTemplate.h"
 #include "MetaTestTemplate.h"
 
-#include "FailureInjectorPlugin.h"
+#include "1test/FailureInjector.h"
 
 FS_META_TEST_TEMPLATE(MockFs)
 
